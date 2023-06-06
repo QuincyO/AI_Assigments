@@ -2,6 +2,7 @@
 #include "Math.h"
 #include <iostream>
 #include <vector>
+#include "sprite.h"
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -51,25 +52,48 @@ struct RigidBody
 
 
 
-class Agent
+class Agent : public Sprite
 {
 public:
 
 
-    Agent(float r1, float r2, float l1, float l2, float maxAccel, float maxSpeed)
+    Agent(float r1, float maxAccel, float maxSpeed) :Sprite()
     {
         m_fish = new RigidBody();
         m_maxAacceleration = maxAccel;
         m_maxSpeed = maxSpeed;
-        whiskerLengthL1 = l1;
-        whiskerLengthL2 = l2;
+        whiskerLengthL1 = r1;
+        whiskerLengthL2 = r1;
         whiskerLengthR1 = r1;
-        whiskerLengthR2 = r2;
+        whiskerLengthR2 = r1;
         m_fish->angularSpeed = 100;
+        whiskerAngleL1 = fmodf(m_fish->rotation - 15 + 360, 360.0f);
+        whiskerAngleL2 = fmodf(m_fish->rotation - 30 + 360, 360.0f);
+        whiskerAngleR1 = fmodf(m_fish->rotation + 15 + 360, 360.0f);
+        whiskerAngleR2 = fmodf(m_fish->rotation + 30 + 360, 360.0f);
+
 
         whiskers = new Vector2[whiskerCount];
         detection = new bool[whiskerCount];
 
+
+       
+
+    }
+
+    void StartUp(const char* filepath)
+    {
+
+        Sprite::LoadImage(filepath);
+        srcRect.x = 0;
+        srcRect.y = 0;
+        srcRect.width = texture.width;
+        srcRect.height = texture.height;
+
+        dstRect;
+        dstRect;
+        dstRect.width = srcRect.width;
+        dstRect.height = srcRect.height;
     }
 
     ~Agent()
@@ -168,8 +192,12 @@ public:
     void Draw()
     {
         Vector2 veloNorm = Normalize(m_fish->velo);
+        dstRect.x = m_fish->pos.x;
+        dstRect.y = m_fish->pos.y;
+        //DrawCircleV(m_fish->pos, circleRadius, BLACK);
 
-        DrawCircleV(m_fish->pos, circleRadius, BLACK);
+        DrawTexturePro(texture, srcRect, dstRect,{(float)texture.width/2,(float)texture.height/2}, m_fish->rotation, WHITE);
+
         DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
         for (int i = 0; i < whiskerCount; i++)
         {
@@ -186,7 +214,6 @@ private:
     float whiskerLengthR1;
     float whiskerLengthR2;
     RigidBody* m_fish;
-
     float circleRadius = 40;
 
 
@@ -199,11 +226,6 @@ private:
 
     bool* detection;
     Vector2* whiskers;
-
-    Vector2 whiskerLeft1;
-    Vector2 whiskerLeft2;
-    Vector2 whiskerRight1;
-    Vector2 whiskerRight2;
 };
 
 
@@ -215,15 +237,18 @@ private:
 int main(void)
 {
     std::vector<Agent*> agents;
-    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 200);
+    Agent* fish1 = new Agent(100, 125, 200);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
     SetTargetFPS(60);
+
 
     float timer = 0;
 
     const float radius = 30;
     const float whiskerLength = 300;
+
+    fish1->StartUp("../game/assets/Fish/fish.png");
 
 
     Vector2 position = { SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2 };//in px
@@ -246,28 +271,6 @@ int main(void)
         mousePOS = GetMousePosition();
 
 
-
-
-        float angle = AngleFromVector(direction);
-
-        float wiskerAngleLeft = fmodf(angle - 30 + 360, 360.0f);
-        float wiskerAngleRight = fmodf(angle + 30 + 360, 360.0f);
-
-        Vector2 wiskerLeft = VectorFromAngleDegrees(wiskerAngleLeft) * whiskerLength;
-        Vector2 wiskerRight = VectorFromAngleDegrees(wiskerAngleRight) * whiskerLength;
-
-        bool leftCollision = CheckCollisionLineCircle(position, mousePOS, wiskerLeft, radius);
-        bool rightCollision = CheckCollisionLineCircle(position, mousePOS, wiskerRight, radius);
-
-        if (leftCollision)
-        {
-            direction = Rotate(direction, 50 * dt * DEG2RAD);
-        }
-
-        if (rightCollision)
-        {
-            direction = Rotate(direction, -50 * dt * DEG2RAD);
-        }
 
 
 
@@ -301,9 +304,7 @@ int main(void)
         //    DrawLineV(position, position + wiskerRight, GREEN);
         //    //DrawCircleV(nearestPointC, 5, BLACK);
 
-        DrawText(TextFormat("Angle: %f.1", angle), 200, position.y + 45, 20, RED);
-        DrawText(TextFormat("Wisker Angle Green : %f.1", wiskerAngleLeft), 200, position.y + 65, 20, RED);
-        DrawText(TextFormat("Wisker Angle Blue : %f.1", wiskerAngleRight), 200, position.y + 85, 20, RED);
+
 
         //  DrawLineV(position, position + acceleration, RED);
         //  DrawLineV(position, position + desiredVelocity, PURPLE);
