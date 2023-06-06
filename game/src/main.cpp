@@ -159,7 +159,7 @@ public:
     //Returns Acceleration Vector Towards obstacle
     Vector2 Seek(Vector2 const  targetPosition, float deltaTIme)
     {
-        Vector2 deltaAccel = Normalize(targetPosition - m_fish->pos) * m_maxSpeed - m_fish->velo;
+        Vector2 deltaAccel = Normalize(targetPosition - m_fish->pos) * m_maxSpeed * m_slowingRatio - m_fish->velo;
 
         m_fish->rotation = AngleFromVector(targetPosition - m_fish->pos);
         //  m_fish->dir = VectorFromAngleDegrees(m_fish->rotation);
@@ -170,20 +170,21 @@ public:
 
     Vector2 Flee(float deltaTime, Vector2 targetPosition)
     {
-        Vector2 deltaAccel = (Normalize(targetPosition - m_fish->pos) * m_maxSpeed - m_fish->velo) * -1;
+        Vector2 deltaAccel = (Normalize(targetPosition - m_fish->pos) * m_maxSpeed * m_slowingRatio - m_fish->velo) * -1;
         return deltaAccel;
     }
 
     void Arrive(Vector2 const  targetPosition)
     {
-        if (Length(targetPosition - m_fish->pos) < 60)
-        {
-            m_maxSpeed = 0;
-        }
-        else
-        {
-        m_maxSpeed = m_maxSpeed * (Length(targetPosition - m_fish->pos) / arrivingZoneCircleRadius);
-        }
+        
+
+        if (Length(targetPosition - m_fish->pos) < 480)
+            m_slowingRatio = (Length(targetPosition - m_fish->pos) / 480);
+        else if(Length(targetPosition - m_fish->pos) < 60)
+            m_fish->velo = Normalize(targetPosition - m_fish->pos) * (Length(targetPosition - m_fish->pos) / 60);
+        else if(Length(targetPosition - m_fish->pos) < 30)
+            m_fish->velo = Normalize(targetPosition - m_fish->pos);
+
     }
 
     void Draw()
@@ -202,6 +203,7 @@ public:
 private:
     float m_maxSpeed; // 350 Px/s 
     float m_maxAacceleration; // 50 Px/s /s
+    float m_slowingRatio;
     float whiskerLengthL1;
     float whiskerLengthL2;
     float whiskerLengthR1;
@@ -237,7 +239,7 @@ private:
 int main(void)
 {
     std::vector<Agent*> agents;
-    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 1000); 
+    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 200); 
     RigidBody* food1 = new RigidBody({ 100.0f, 100.0f }, {0,0}, {0,0}, {0,0}, 0.0f, 0.0f);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
@@ -301,10 +303,10 @@ int main(void)
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
 
 
-        fish1->Arrive(mousePOS);
         fish1->Seek(mousePOS, dt);
 
         fish1->Avoid(position, dt, radius);
+        fish1->Arrive(mousePOS);
 
         fish1->Update(dt);
         fish1->Draw();
