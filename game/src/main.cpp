@@ -39,14 +39,24 @@ Vector2 VectorFromAngleDegrees(float angleDegrees)
     return Vector2{ cosf(angleDegrees * DEG2RAD),sinf(angleDegrees * DEG2RAD) };
 }
 
-struct RigidBody
+class RigidBody
 {
+public:
+
     Vector2 pos = { SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2 };
     Vector2 accel = {};
     Vector2 velo = {};
     Vector2 dir = {};
     float rotation;
     float angularSpeed;
+    float m_slowingRatio = 1.0f;
+
+    RigidBody() = default;
+
+    RigidBody(const Vector2& pos, const Vector2& accel, const Vector2& velo, const Vector2& dir, float rotation, float angularSpeed)
+        : pos(pos), accel(accel), velo(velo), dir(dir), rotation(rotation), angularSpeed(angularSpeed)
+    {
+    }
 };
 
 
@@ -54,7 +64,6 @@ struct RigidBody
 class Agent
 {
 public:
-
 
     Agent(float r1, float r2, float l1, float l2, float maxAccel, float maxSpeed)
     {
@@ -165,6 +174,18 @@ public:
         return deltaAccel;
     }
 
+    void Arrive(Vector2 const  targetPosition)
+    {
+        if (Length(targetPosition - m_fish->pos) < 60)
+        {
+            m_maxSpeed = 0;
+        }
+        else
+        {
+        m_maxSpeed = m_maxSpeed * (Length(targetPosition - m_fish->pos) / arrivingZoneCircleRadius);
+        }
+    }
+
     void Draw()
     {
         Vector2 veloNorm = Normalize(m_fish->velo);
@@ -187,7 +208,8 @@ private:
     float whiskerLengthR2;
     RigidBody* m_fish;
 
-    float circleRadius = 40;
+    float circleRadius = 40.0f;
+    float arrivingZoneCircleRadius = 120.0f;
 
 
     float whiskerAngleL1;
@@ -215,7 +237,8 @@ private:
 int main(void)
 {
     std::vector<Agent*> agents;
-    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 200);
+    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 1000); 
+    RigidBody* food1 = new RigidBody({ 100.0f, 100.0f }, {0,0}, {0,0}, {0,0}, 0.0f, 0.0f);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
     SetTargetFPS(60);
@@ -278,13 +301,14 @@ int main(void)
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
 
 
-
+        fish1->Arrive(mousePOS);
         fish1->Seek(mousePOS, dt);
 
         fish1->Avoid(position, dt, radius);
+
         fish1->Update(dt);
         fish1->Draw();
-
+       
 
 
 
@@ -293,7 +317,7 @@ int main(void)
         position = WrapAroundScreen(position);
         DrawCircleV(mousePOS, radius, RED);
         DrawCircleV(position, 25, BLUE);
-
+        DrawCircleV(food1->pos, 40, YELLOW);
 
         //    DrawLineV(position, position + Vector2{100,0}, BLACK);
         //    DrawLineV(position, position + direction *100, PINK);
