@@ -202,8 +202,8 @@ public:
             {
                // slowRatio = 0;
             }
-            desiredVelocity = Normalize(desiredVelocity) * m_maxSpeed * slowRatio;
-            Vector2 steering = desiredVelocity - (Normalize(m_fish->velo)*m_maxAacceleration);
+            desiredVelocity = Normalize(desiredVelocity) *(m_maxSpeed*2) * slowRatio;
+            Vector2 steering = desiredVelocity - (Normalize(m_fish->velo)*(m_maxAacceleration+100));
             m_fish->accel = m_fish->accel + steering;
 
             if (distance < 30)
@@ -212,12 +212,6 @@ public:
             }
             return steering;
         }
-
-
-
-        
-        
-
     }
 
     void Draw()
