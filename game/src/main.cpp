@@ -130,6 +130,14 @@ public:
 
     }
 
+    void Integrate(float deltaTime)
+    {
+        m_fish->pos = m_fish->pos + (m_fish->velo * deltaTime) + ((m_fish->accel * 0.5f) * deltaTime * deltaTime);
+        m_fish->velo = m_fish->velo + m_fish->accel * deltaTime;
+        m_fish->pos = WrapAroundScreen(m_fish->pos);
+        m_fish->accel = {};
+    }
+
     //Updates Movement
     void Update(float deltaTime)
     {
@@ -146,25 +154,29 @@ public:
         if (MagOfVelo > m_maxSpeed)
         {
             m_fish->velo = m_fish->velo * (m_maxSpeed / MagOfVelo);
+            
         };
-        m_fish->pos = m_fish->pos + (m_fish->velo * deltaTime) + ((m_fish->accel * 0.5f) * deltaTime * deltaTime);
-        m_fish->velo = m_fish->velo + m_fish->accel * deltaTime;
-        m_fish->pos = WrapAroundScreen(m_fish->pos);
-        m_fish->accel = {};
+
+
+        
 
         //  m_fish->dir = RotateTowards(m_fish->dir, Normalize(m_fish->velo), m_fish->angularSpeed * deltaTime);
+        Integrate(deltaTime);
     }
 
 
     //Returns Acceleration Vector Towards obstacle
-    Vector2 Seek(Vector2 const  targetPosition, float deltaTIme)
+    Vector2 Seek(Vector2 const  targetPosition, float deltaTime)
     {
-        Vector2 deltaAccel = Normalize(targetPosition - m_fish->pos) * m_maxSpeed * m_slowingRatio - m_fish->velo;
+        Vector2 desiredVelocity = Normalize(targetPosition - m_fish->pos) * m_maxSpeed;
+        Vector2 deltaV = desiredVelocity - m_fish->velo;
 
-        m_fish->rotation = AngleFromVector(targetPosition - m_fish->pos);
-        //  m_fish->dir = VectorFromAngleDegrees(m_fish->rotation);
-        m_fish->accel = deltaAccel;
-        return deltaAccel;
+        Vector2 accel = Normalize(deltaV) * m_maxAacceleration;
+
+        //m_fish->rotation = AngleFromVector(targetPosition - m_fish->pos);
+        m_fish->accel = accel;
+       // Integrate(deltaTime, accel);
+        return accel;
     }
 
 
@@ -174,16 +186,37 @@ public:
         return deltaAccel;
     }
 
-    void Arrive(Vector2 const  targetPosition)
+    Vector2 Arrive(Vector2 const  targetPosition,float deltaTime)
     {
-        
+        float r = 250;
+        Vector2 desiredVelocity = targetPosition - m_fish->pos;
 
-        if (Length(targetPosition - m_fish->pos) < 480)
-            m_slowingRatio = (Length(targetPosition - m_fish->pos) / 480);
-        else if(Length(targetPosition - m_fish->pos) < 60)
-            m_fish->velo = Normalize(targetPosition - m_fish->pos) * (Length(targetPosition - m_fish->pos) / 60);
-        else if(Length(targetPosition - m_fish->pos) < 30)
-            m_fish->velo = Normalize(targetPosition - m_fish->pos);
+        float distance = Distance(targetPosition, m_fish->pos);
+        float distance1 = Length(desiredVelocity);
+
+
+        if (distance < r)
+        {
+            float slowRatio = distance / r;
+            if (distance < 30)
+            {
+               // slowRatio = 0;
+            }
+            desiredVelocity = Normalize(desiredVelocity) * m_maxSpeed * slowRatio;
+            Vector2 steering = desiredVelocity - (Normalize(m_fish->velo)*m_maxAacceleration);
+            m_fish->accel = m_fish->accel + steering;
+
+            if (distance < 30)
+            {
+                int i = 0;
+            }
+            return steering;
+        }
+
+
+
+        
+        
 
     }
 
@@ -192,6 +225,7 @@ public:
         Vector2 veloNorm = Normalize(m_fish->velo);
 
         DrawCircleV(m_fish->pos, circleRadius, BLACK);
+   //     DrawCircleLines(m_fish->pos.x, m_fish->pos.y, 150, RED);
         DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
         for (int i = 0; i < whiskerCount; i++)
         {
@@ -224,10 +258,6 @@ private:
     bool* detection;
     Vector2* whiskers;
 
-    Vector2 whiskerLeft1;
-    Vector2 whiskerLeft2;
-    Vector2 whiskerRight1;
-    Vector2 whiskerRight2;
 };
 
 
@@ -239,7 +269,7 @@ private:
 int main(void)
 {
     std::vector<Agent*> agents;
-    Agent* fish1 = new Agent(100, 100, 100, 100, 125, 200); 
+    Agent* fish1 = new Agent(100, 100, 100, 100, 300, 250); 
     RigidBody* food1 = new RigidBody({ 100.0f, 100.0f }, {0,0}, {0,0}, {0,0}, 0.0f, 0.0f);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
@@ -302,16 +332,19 @@ int main(void)
         //  ImGui::SliderFloat("Max Acceleration", &maxAccel, 1, 1500); 
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
 
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
 
-        fish1->Seek(mousePOS, dt);
+            fish1->Seek(mousePOS, dt);
+        }
 
-        fish1->Avoid(position, dt, radius);
-        fish1->Arrive(mousePOS);
+        fish1->Arrive(mousePOS,dt);
 
         fish1->Update(dt);
         fish1->Draw();
        
 
+    //    fish1->Avoid(position, dt, radius);
 
 
 
