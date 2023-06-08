@@ -198,18 +198,16 @@ public:
         if (distance < r)
         {
             float slowRatio = distance / r;
-            if (distance < 30)
+            if (distance < 15)
             {
-               // slowRatio = 0;
+                desiredVelocity = { 0,0 };
             }
-            desiredVelocity = Normalize(desiredVelocity) *(m_maxSpeed*2) * slowRatio;
-            Vector2 steering = desiredVelocity - (Normalize(m_fish->velo)*(m_maxAacceleration+100));
-            m_fish->accel = m_fish->accel + steering;
+            else {
 
-            if (distance < 30)
-            {
-                int i = 0;
+            desiredVelocity = Normalize(desiredVelocity) *(m_maxSpeed*slowRatio) ;
             }
+            Vector2 steering = (desiredVelocity)-m_fish->velo;
+            m_fish->accel = m_fish->accel + (Normalize(steering) * m_maxAacceleration);
             return steering;
         }
     }
@@ -221,6 +219,8 @@ public:
         DrawCircleV(m_fish->pos, circleRadius, BLACK);
    //     DrawCircleLines(m_fish->pos.x, m_fish->pos.y, 150, RED);
         DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
+        DrawText(TextFormat("Speed: %f.1", Length(m_fish->velo)), 200, 400 + 45, 20, BLACK);
+
         for (int i = 0; i < whiskerCount; i++)
         {
             DrawLineV(m_fish->pos, m_fish->pos + whiskers[i], (detection[i]) ? RED : GREEN);
@@ -257,13 +257,10 @@ private:
 
 
 
-
-
-
 int main(void)
 {
     std::vector<Agent*> agents;
-    Agent* fish1 = new Agent(100, 100, 100, 100, 300, 250); 
+    Agent* fish1 = new Agent(100, 100, 100, 100, 300, 350);
     RigidBody* food1 = new RigidBody({ 100.0f, 100.0f }, {0,0}, {0,0}, {0,0}, 0.0f, 0.0f);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
@@ -332,7 +329,9 @@ int main(void)
             fish1->Seek(mousePOS, dt);
         }
 
+
         fish1->Arrive(mousePOS,dt);
+            
 
         fish1->Update(dt);
         fish1->Draw();
@@ -352,11 +351,8 @@ int main(void)
         //    DrawLineV(position, position + direction *100, PINK);
         //    DrawLineV(position, position + wiskerLeft, (CheckCollisionLineCircle(position,mousePOS,wiskerLeft,radius)) ? RED : GREEN);
         //    DrawLineV(position, position + wiskerRight, GREEN);
-        //    //DrawCircleV(nearestPointC, 5, BLACK);
+        //    DrawCircleV(nearestPointC, 5, BLACK);
 
-        DrawText(TextFormat("Angle: %f.1", angle), 200, position.y + 45, 20, RED);
-        DrawText(TextFormat("Wisker Angle Green : %f.1", wiskerAngleLeft), 200, position.y + 65, 20, RED);
-        DrawText(TextFormat("Wisker Angle Blue : %f.1", wiskerAngleRight), 200, position.y + 85, 20, RED);
 
         //  DrawLineV(position, position + acceleration, RED);
         //  DrawLineV(position, position + desiredVelocity, PURPLE);
