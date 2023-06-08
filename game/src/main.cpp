@@ -61,22 +61,12 @@ int main(void)
         //  ImGui::SliderFloat("Max Acceleration", &maxAccel, 1, 1500); 
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
 
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-
-            fish1->Seek(mousePOS, dt);
-        }
 
 
        
             
 
-        fish1->Update(dt);
-        fish1->Draw();
        
-
-    //    fish1->Avoid(position, dt, radius);
-
 
 
 
