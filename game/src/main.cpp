@@ -192,7 +192,6 @@ public:
         Vector2 desiredVelocity = targetPosition - m_fish->pos;
 
         float distance = Distance(targetPosition, m_fish->pos);
-        float distance1 = Length(desiredVelocity);
 
 
         if (distance < r)
@@ -207,7 +206,8 @@ public:
             desiredVelocity = Normalize(desiredVelocity) *(m_maxSpeed*slowRatio) ;
             }
             Vector2 steering = (desiredVelocity)-m_fish->velo;
-            m_fish->accel = m_fish->accel + (Normalize(steering) * m_maxAacceleration);
+            steering = Normalize(steering) * m_maxAacceleration;
+            m_fish->accel = m_fish->accel + steering;
             return steering;
         }
     }
