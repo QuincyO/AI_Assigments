@@ -96,7 +96,7 @@ void Agent::Draw()
     if (Neighborhood.inHood)
     for (int i = 0; i < whiskerCount; i++)
     {
-        DrawLineV(m_fish->pos, m_fish->pos + whiskers[i], (detection[i]) ? RED : GREEN);
+        DrawLineV(m_fish->pos, m_fish->pos + whiskers[i], &(detection[i]) ? RED : GREEN);
 
     }
 }

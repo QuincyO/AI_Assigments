@@ -150,7 +150,7 @@ int main(void)
             DrawText("Arrive Mode", 15, 20, 50, WHITE);
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                objects.push_back(new Food(mousePOS, 10,"food"));
+                objects.push_back(new Food(mousePOS, 100,"food"));
             }
         }
         else if (Mode["Flee"])
