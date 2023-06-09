@@ -9,7 +9,7 @@
 #include "Predator.h"
 #include "Steeringbehaviors.h"
 #include <map>
-//#include "TextureManager.h"
+#include "TextureManager.h"
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -19,9 +19,16 @@
 
 int main(void)
 {
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
+    rlImGuiSetup(true);
+    SetTargetFPS(60);
     srand(time(NULL));
 
-    Texture2D* tex = &LoadTexture("../CreditScore.png");
+    TextureManager::Load("../game/assets/Fish/fish.png", "fish");
+    TextureManager::Load("../game/assets/Fish/food.png", "food");
+    TextureManager::Load("../game/assets/Fish/enemy.png", "enemy");
+    TextureManager::Load("../game/assets/Fish/obstacle.png", "rock");
+    
 
     //Creating bools for GameMode
     std::map<std::string, bool> Mode;
@@ -57,9 +64,6 @@ int main(void)
 
 
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
-    rlImGuiSetup(true);
-    SetTargetFPS(60);
 
     float timer = 0;
 
@@ -240,7 +244,6 @@ int main(void)
         }
        
 
-        DrawTextureEx(*tex, { 500,500 }, 9, 1, WHITE);
 
         DrawCircleV(mousePOS, radius, RED);
 

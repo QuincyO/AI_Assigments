@@ -4,11 +4,11 @@
 class Food : public GameObject
 {
 private:
-	int foodPoints;
+	float foodPoints;
 	float eatSpeed = 1.0f/60.0f;
 	bool ate;
 public:
-	Food( Vector2 position,int foodPoints)
+	Food( Vector2 position,float foodPoints)
 		: GameObject( position)
 		, foodPoints { foodPoints }
 		,ate{false}

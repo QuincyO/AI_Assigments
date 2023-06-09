@@ -1,4 +1,5 @@
 #include "Agent.h"
+#include "TextureManager.h"
 
 Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float maxAccel, float maxSpeed)
 {
@@ -79,8 +80,8 @@ void Agent::Draw()
 {
     Vector2 veloNorm = Normalize(m_fish->velo);
 
-    //DrawTextureEx(texture, GetPosition(), m_fish->rotation, 1, WHITE);
-    DrawCircleV(m_fish->pos, 50, BLACK);
+    DrawTextureEx(TextureManager::GetTexture("fish"), GetPosition(), m_fish->rotation, 1, WHITE);
+    //DrawCircleV(m_fish->pos, 50, BLACK);
 
 
 
