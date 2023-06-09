@@ -27,7 +27,8 @@ int main(void)
     TextureManager::Load("../game/assets/Fish/food.png", "food");
     TextureManager::Load("../game/assets/Fish/enemy.png", "enemy");
     TextureManager::Load("../game/assets/Fish/obstacle.png", "rock");
-    
+    TextureManager::Load("../game/assets/Fish/background.png", "background");
+
     //Creating bools for GameMode
     std::map<std::string, bool> Mode;
     Mode.emplace("Off", false);
@@ -80,6 +81,7 @@ int main(void)
         Vector2 tempAccel = { 0,0 };
         BeginDrawing();
         ClearBackground(GRAY);
+        DrawTexturePro(TextureManager::GetTexture("background"), { 0,0,5760,2880 }, { 0,0,SCREEN_WIDTH, SCREEN_HEIGHT }, { 0,0 }, 0.0f, WHITE);
         rlImGuiBegin();
 
         const float dt = GetFrameTime();
@@ -129,6 +131,40 @@ int main(void)
             for (auto& options : Mode)
             {
                 options.second = false;
+            }
+        }
+        if (IsKeyPressed(KEY_SPACE)) //Reset simulation: clear agent and object contaners and regenerate agents.
+        {
+            for (GameObject* object : objects)
+            {
+                delete object;
+                object = nullptr;
+                objects.clear();
+            }
+
+            for (Agent* fish : agents)
+            {
+                delete fish;
+                fish = nullptr;
+                agents.clear();
+            }
+
+            for (int i = 0; i < 15; i++)
+            {
+                Vector2 tempPos = {
+                    rand() % SCREEN_WIDTH + 1,
+                    rand() % SCREEN_HEIGHT + 1,
+                };
+
+                int randomMaxSpeed = 250 + (rand() % 151);
+                int randomMaxAccel = 250 + (rand() % 151);
+
+                if (i < 5) { randomMaxSpeed += 150; randomMaxAccel += 150; }
+                else if (i >= 10) { randomMaxSpeed -= 150; randomMaxAccel -= 150; }
+
+
+
+                agents.push_back(new Agent(tempPos, 100, 100, randomMaxAccel, randomMaxSpeed, "fish"));
             }
         }
 
@@ -224,19 +260,6 @@ int main(void)
             fish->Draw();
             fish->Update(dt);
         }
-       
-        if (IsKeyPressed(KEY_SPACE))
-        {
-            for (GameObject* object : objects)
-            {
-                delete object;
-                object = nullptr;
-                objects.clear();
-            }
-        }
-
-
-        DrawCircleV(mousePOS, radius, RED);
 
         timer += dt;
         rlImGuiEnd();
