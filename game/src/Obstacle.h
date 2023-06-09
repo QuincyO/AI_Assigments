@@ -4,9 +4,10 @@
 class Obstacle : public GameObject
 {
 public:
-	Obstacle( Vector2 position, int width, int height)
-		: GameObject( position, width, height)
+	Obstacle( Vector2 position)
+		: GameObject( position)
 	{
-
 	}
+	ObjectType GetType() const { return ObjectType::ObstacleType; }
+
 };

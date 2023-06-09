@@ -5,18 +5,21 @@ class Food : public GameObject
 {
 private:
 	int foodPoints;
-	int eatSpeed;
-
+	float eatSpeed = 1.0f/60.0f;
+	bool ate;
 public:
-	Food( Vector2 position, int width, int height)
-		: GameObject( position, width, height)
-		, foodPoints { 100 }
-		, eatSpeed { 5 }
+	Food( Vector2 position,int foodPoints)
+		: GameObject( position)
+		, foodPoints { foodPoints }
+		,ate{false}
 	{
 
 	}
 
-	int getFoodPoints();
-	void eatFood(int eatSpeed, float deltaTime);
+	ObjectType GetType() const { return ObjectType::FoodType; }
+
+	bool IsAte() { return ate; }
+
+	void Damage();
 };
 

@@ -81,7 +81,9 @@ void Agent::Draw()
     DrawCircleV(m_fish->pos, 50, BLACK);
     DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
     DrawText(TextFormat("Speed: %f.1", Length(m_fish->velo)), 200, 400 + 45, 20, BLACK);
-
+    DrawLineV(m_fish->pos, m_fish->pos + Normalize(m_fish->accel)*100, RED);
+    DrawCircleLines(GetPosition().x, GetPosition().y, Neighborhood.slowingRadius, (Neighborhood.inHood) ? GREEN : RED);
+    if (Neighborhood.inHood)
     for (int i = 0; i < whiskerCount; i++)
     {
         DrawLineV(m_fish->pos, m_fish->pos + whiskers[i], (detection[i]) ? RED : GREEN);

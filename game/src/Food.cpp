@@ -1,11 +1,12 @@
 #include "Food.h"
 
-int Food::getFoodPoints()
+void Food::Damage()
 {
-	return foodPoints;
+	if (!ate)
+	{
+		foodPoints -= 1 * eatSpeed;
+		if (foodPoints <= 0)ate = true;
+	}
+
 }
 
-void Food::eatFood(int eatSpeed, float deltaTime)
-{
-	foodPoints = foodPoints - eatSpeed * deltaTime;
-}

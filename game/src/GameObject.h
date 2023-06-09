@@ -1,10 +1,11 @@
 #pragma once
 #include "raylib.h"
+#include <iostream>
 
 enum ObjectType
 {
-	Food,
-	Obstacle,
+	FoodType,
+	ObstacleType,
 	Enemy,
 
 };
@@ -12,20 +13,22 @@ enum ObjectType
 class GameObject
 {
 protected:
-	int width;
-	int height;
+	Vector2 position;
+
 
 public:
-	GameObject(Vector2 position, int hp, int width, int height);
-	GameObject(Vector2 position, int width, int height) { this->hp = 0; }
-	int hp;
-	Vector2 position;
+	GameObject(Vector2 position)
+		:position{position}
+	{}
 
 	Vector2 GetPosition() const { return position; }
 
+	void RemoveFromScreen() { position = { -500,-500 }; }
+
 	virtual ObjectType GetType() const  = 0;
 
-	void Damage(float timeScale) { hp -= 1 * timeScale; }
+	virtual bool IsAte() { std::cout << "Parent" << std::endl; return NULL; };
+	virtual void Damage() {};
 
 	virtual void Draw() {}
 };

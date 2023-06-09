@@ -4,10 +4,11 @@
 class Predator : public GameObject
 {
 public:
-	Predator( Vector2 position, int width, int height)
-		: GameObject( position, width, height)
+	Predator( Vector2 position)
+		: GameObject( position)
 	{
-
 	}
+
+	ObjectType GetType() const { return ObjectType::Enemy; }
 };
 

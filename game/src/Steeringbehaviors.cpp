@@ -14,6 +14,8 @@ Vector2 Steeringbehaviors::Seek(Agent* agent, Vector2 targetPosition)
 
 	Vector2 desiredAcceleration = Normalize(deltaV) * agent->GetMaxAccleration();
 
+	agent->m_fish->accel = desiredAcceleration;
+
 	return deltaV;
 }
 
@@ -26,6 +28,8 @@ Vector2 Steeringbehaviors::Flee(Agent* agent, Vector2 targetPosition)
 	Vector2 deltaV = desiredVelocity - agent->GetVelo();
 
 	Vector2 desiredAcceleration = Normalize(deltaV) * agent->GetMaxAccleration();
+
+	agent->m_fish->accel = desiredAcceleration * -1;
 
 	return desiredAcceleration * -1;
 }
@@ -43,11 +47,6 @@ Vector2 Steeringbehaviors::Arrive(Agent* agent, GameObject* object)
 		float slowRatio = distance / agent->Neighborhood.slowingRadius;
 		if (distance <= agent->Neighborhood.arrivedRadius)
 		{
-			object->Damage(1.0f / 60.0f);
-			if (object->hp < 1)
-			{
-				object->position = { -500,-500 };
-			}
 			desiredVelocity = { 0,0 };
 		}
 		else
@@ -55,8 +54,7 @@ Vector2 Steeringbehaviors::Arrive(Agent* agent, GameObject* object)
 			desiredVelocity = Normalize(desiredVelocity) * (agent->GetMaxSpeed() * slowRatio);
 		}
 		Vector2 steering = desiredVelocity - agent->GetVelo();
-		//steering = Normalize(steering) * agent->GetMaxAccleration();
-		
+		agent->m_fish->accel =  Normalize(steering) * (agent->GetMaxAccleration()*1.5f);
 		
 		return steering;
 	}

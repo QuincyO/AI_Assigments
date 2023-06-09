@@ -6,58 +6,55 @@
 #include "GameObject.h"
 #include "Food.h"
 #include "Obstacle.h"
+#include "Predator.h"
 #include "Steeringbehaviors.h"
+#include <map>
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
-//        position = position + (m_fish->GetVelocity() * deltaTime) + ((acceleration * 0.5f) * deltaTime * deltaTime);
-//        position = WrapAroundScreen(position);
-//        m_fish->SetPosition(position);
-//        m_fish->SetVelocity(m_fish->GetVelocity() + acceleration * deltaTime);
 
 
-
-
-
-class Circle : public GameObject
-{
-public:
-
-    void Draw()
-    {
-        DrawCircleV(position, radius, PURPLE);
-    }
-
-    ObjectType GetType() const { return ObjectType::Food; }
-
-    Circle(Vector2 position, int hp, int width, int height) : GameObject(position,hp, 50, 50), health{ hp } {}
-    float radius = 40;
-    int health;
-};
-
-class Rock : public GameObject
-{
-public:
-    void Draw()
-    {
-        DrawCircleV(position, 40, BLACK);
-    }
-    Rock(Vector2 position,int hp,int width,int height) : GameObject(position,hp, 50, 50){}
-
-    ObjectType GetType() const { return ObjectType::Obstacle; }
-};
 
 
 int main(void)
 {
-    std::vector<GameObject*> objects;
-    
-    Circle* circle = new Circle({ 600,500 },50, 50, 50);
-    Rock* rock = new Rock({ 250,250 },50, 50, 50);
+    srand(time(NULL));
 
-    objects.push_back(circle);
-    objects.push_back(rock);
-    Agent* fish1 = new Agent({ SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2 }, 100, 100, 300, 350);
+
+    //Creating bools for GameMode
+    std::map<std::string, bool> Mode;
+    Mode.emplace("Off", false);
+    Mode.emplace("Seek", false);
+    Mode.emplace("Arrive", false);
+    Mode.emplace("Flee", false);
+    Mode.emplace("Avoid", false);
+
+
+    std::vector<GameObject*> objects;
+    std::vector<Agent*> agents;
+
+
+    //Randomizing TopSpeed and Accleration Of fish
+    for (int i = 0; i < 15; i++)
+    {
+        Vector2 tempPos = {
+            rand() % SCREEN_WIDTH + 1,
+            rand() % SCREEN_HEIGHT + 1,
+        };
+
+        int randomMaxSpeed = 250 + (rand() % 151);
+        int randomMaxAccel = 250 + (rand() % 151);
+
+        if (i < 5) { randomMaxSpeed += 150; randomMaxAccel += 150; }
+        else if (i >=10) { randomMaxSpeed -= 150; randomMaxAccel -= 150; }
+
+
+
+        agents.push_back(new Agent(tempPos, 100, 100, randomMaxAccel, randomMaxSpeed));
+    }
+
+
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
     SetTargetFPS(60);
@@ -99,82 +96,146 @@ int main(void)
         //  ImGui::SliderFloat2("Acceleration", &(acceleration.x), -maxAccel, maxAccel);
         //  ImGui::SliderFloat("Max Acceleration", &maxAccel, 1, 1500); 
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
+
+
         if (IsKeyPressed(KEY_ONE))
         {
-            seek = true;
-            flee = false;
-            arrive = false;
-
+            for (auto& options : Mode)
+            {
+                options.second = false;
+            }
+            Mode["Seek"] = true;
         }
         if (IsKeyPressed(KEY_TWO))
         {
-            flee = true;
-            seek = false;
+            for (auto& options : Mode)
+            {
+                options.second = false;
+            }
+            Mode["Flee"] = true;
         }
         if (IsKeyPressed(KEY_THREE))
         {
-            arrive = true;
-            seek = false;
-            flee = false;
+            for (auto& options : Mode)
+            {
+                options.second = false;
+            }
+            Mode["Arrive"] = true;
+        }
+        if (IsKeyPressed(KEY_FOUR))
+        {
+            for (auto& options : Mode)
+            {
+                options.second = false;
+            }
+            Mode["Avoid"] = true;
         }
         if (IsKeyPressed(KEY_ZERO))
         {
-            seek = false;
-            flee = false;
-            arrive = false;
-        }
-
-
-
-        if (seek && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            tempAccel = Steeringbehaviors::Seek(fish1, mousePOS);
-            //fish1->Update(Steeringbehaviors::Seek(fish1, mousePOS),dt);
-        }
-        else if (arrive && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            
-            objects.push_back(new Circle(mousePOS, 50, 50, 50));
-        }
-        
-        for (GameObject* object : objects)
-        {
-            float distance = Distance(fish1->GetPosition(), object->GetPosition());
-
-            if (distance < fish1->Neighborhood.slowingRadius)
+            for (auto& options : Mode)
             {
-                if (object->GetType() == ObjectType::Food)
-                {
-                    //Arrive to Food
-                    tempAccel = tempAccel + Steeringbehaviors::Arrive(fish1, object);
-                    //fish1->Update(Steeringbehaviors::Arrive(fish1,object), dt);
-
-                }
-                else if (object->GetType() == ObjectType::Obstacle)
-                {
-                    //Avoid Obstacle
-                    Steeringbehaviors::Avoid(fish1, object->GetPosition(), dt);
-
-                }
-                else if (object->GetType() == ObjectType::Enemy)
-                {
-                    //Flee Predator
-                   // tempAccel = Steeringbehaviors::Flee(fish1)
-                }
+                options.second = false;
             }
         }
 
 
 
-        fish1->Update(tempAccel,dt);
-        fish1->Draw();
+        if (Mode["Seek"])
+        {
+            DrawText("Seek Mode", 15, 20, 50, WHITE);
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            {
+                for (Agent* fish : agents)
+                {
+                    Steeringbehaviors::Seek(fish, mousePOS);
+                }
 
+            }
+        }
+        else if (Mode["Arrive"])
+        {
+            DrawText("Arrive Mode", 15, 20, 50, WHITE);
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                objects.push_back(new Food(mousePOS, 50));
+            }
+        }
+
+        
+        
+        else if (Mode["Flee"])
+        {
+
+            DrawText("Flee Mode", 15, 20, 50, WHITE);
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                objects.push_back(new Predator(mousePOS));
+            }
+        }
+        else if (Mode["Avoid"])
+        {
+            DrawText("Avoid Mode", 15, 20, 50, WHITE);
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                objects.push_back(new Obstacle(mousePOS));
+            }
+        }
+
+        for (Agent* fish : agents)
+        {
+
+            for (GameObject* object : objects)
+            {
+                float distance = Distance(fish->GetPosition(), object->GetPosition());
+
+                if (distance < fish->Neighborhood.slowingRadius)
+                {
+                    if (object->GetType() == ObjectType::FoodType)
+                    {
+                    fish->Neighborhood.inHood = true;
+                        //Arrive to Food
+                        Steeringbehaviors::Arrive(fish, object);
+
+                        if (distance <= fish->Neighborhood.arrivedRadius)
+                        {
+                            object->Damage();
+                            if (object->IsAte())
+                            {
+                                object->RemoveFromScreen();
+                            }
+                        }
+
+                    }
+                     if (object->GetType() == ObjectType::ObstacleType)
+                    {
+                    fish->Neighborhood.inHood = true;
+                        //Avoid Obstacle
+                        Steeringbehaviors::Avoid(fish, object->GetPosition(), dt);
+
+                    }
+                     if (object->GetType() == ObjectType::Enemy)
+                    {
+                    fish->Neighborhood.inHood = true;
+                        Steeringbehaviors::Flee(fish, object->GetPosition());
+                    }
+
+                }
+                else fish->Neighborhood.inHood = false;
+            }
+
+        }
 
         for (GameObject* object : objects)
         {
             object->Draw();
         }
 
+        for (Agent* fish : agents)
+        {
+
+            fish->Draw();
+            fish->Update(dt);
+        }
        
 
 
