@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <iostream>
+#include "Sprite.h"
 
 enum ObjectType
 {
@@ -10,15 +11,15 @@ enum ObjectType
 
 };
 
-class GameObject
+class GameObject : public Sprite
 {
 protected:
 	Vector2 position;
 
-
 public:
-	GameObject(Vector2 position)
-		:position{position}
+	GameObject(Vector2 position,std::string key)
+		:Sprite(key)
+		,position{position}
 	{}
 
 	Vector2 GetPosition() const { return position; }
@@ -27,9 +28,10 @@ public:
 
 	virtual ObjectType GetType() const  = 0;
 
-	virtual bool IsAte() { std::cout << "Parent" << std::endl; return NULL; };
+	virtual bool IsAte() { return false; };
+
 	virtual void Damage() {};
 
-	virtual void Draw() {}
+	virtual void Draw() = 0;
 };
 

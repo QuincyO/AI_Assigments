@@ -1,7 +1,8 @@
 #include "Agent.h"
 #include "TextureManager.h"
 
-Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float maxAccel, float maxSpeed)
+Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float maxAccel, float maxSpeed,std::string key)
+    : Sprite(key)
 {
     m_fish = new Rigidbody(angularSpeed, positon);
     m_maxAacceleration = maxAccel;
@@ -13,11 +14,11 @@ Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float max
     whiskerAngleL2 = fmodf(m_fish->rotation - 30 + 360, 360.0f);
     whiskerAngleR1 = fmodf(m_fish->rotation + 15 + 360, 360.0f);
     whiskerAngleR2 = fmodf(m_fish->rotation + 30 + 360, 360.0f);
+    Neighborhood.inHood = false;
     for (int i = 0; i < whiskerCount; i++)
     {
         detection[i] = false;
     }
-    //texture = LoadTexture("../game/assets/Fish/fish.png");
 }
 
 Agent::~Agent()
@@ -80,7 +81,10 @@ void Agent::Draw()
 {
     Vector2 veloNorm = Normalize(m_fish->velo);
 
-   // DrawTexturePro(TextureManager::GetTexture("fish"), GetPosition(), m_fish->rotation, 1, WHITE);
+    dst.x = GetPosition().x;
+    dst.y = GetPosition().y;
+    Vector2 origin = { dst.width / 2,dst.height / 2 };
+    DrawTexturePro(TextureManager::GetTexture("fish"), src, dst, origin, m_fish->rotation, WHITE);
     //DrawCircleV(m_fish->pos, 50, BLACK);
 
 

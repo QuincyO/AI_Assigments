@@ -59,7 +59,7 @@ int main(void)
 
 
 
-        agents.push_back(new Agent(tempPos, 100, 100, randomMaxAccel, randomMaxSpeed));
+        agents.push_back(new Agent(tempPos, 100, 100, randomMaxAccel, randomMaxSpeed,"fish"));
     }
 
 
@@ -163,7 +163,7 @@ int main(void)
             DrawText("Arrive Mode", 15, 20, 50, WHITE);
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                objects.push_back(new Food(mousePOS, 50));
+                objects.push_back(new Food(mousePOS, 10,"food"));
             }
         }
 
@@ -175,7 +175,7 @@ int main(void)
             DrawText("Flee Mode", 15, 20, 50, WHITE);
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                objects.push_back(new Predator(mousePOS));
+                objects.push_back(new Predator(mousePOS,"enemy"));
             }
         }
         else if (Mode["Avoid"])
@@ -183,7 +183,7 @@ int main(void)
             DrawText("Avoid Mode", 15, 20, 50, WHITE);
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                objects.push_back(new Obstacle(mousePOS));
+                objects.push_back(new Obstacle(mousePOS,"rock"));
             }
         }
 
@@ -201,7 +201,6 @@ int main(void)
                     fish->Neighborhood.inHood = true;
                         //Arrive to Food
                         Steeringbehaviors::Arrive(fish, object);
-
                         if (distance <= fish->Neighborhood.arrivedRadius)
                         {
                             object->Damage();
@@ -210,21 +209,18 @@ int main(void)
                                 object->RemoveFromScreen();
                             }
                         }
-
                     }
                      if (object->GetType() == ObjectType::ObstacleType)
-                    {
-                    fish->Neighborhood.inHood = true;
+                        {
+                        fish->Neighborhood.inHood = true;
                         //Avoid Obstacle
                         Steeringbehaviors::Avoid(fish, object->GetPosition(), dt);
-
-                    }
+                        }
                      if (object->GetType() == ObjectType::Enemy)
-                    {
-                    fish->Neighborhood.inHood = true;
-                        Steeringbehaviors::Flee(fish, object->GetPosition());
-                    }
-
+                     {
+                         fish->Neighborhood.inHood = true;
+                         Steeringbehaviors::Flee(fish, object->GetPosition());
+                     }
                 }
                 else fish->Neighborhood.inHood = false;
             }
@@ -243,6 +239,15 @@ int main(void)
             fish->Update(dt);
         }
        
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            for (GameObject* object : objects)
+            {
+                delete object;
+                object = nullptr;
+                objects.clear();
+            }
+        }
 
 
         DrawCircleV(mousePOS, radius, RED);

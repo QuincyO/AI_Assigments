@@ -1,6 +1,7 @@
 #pragma once
 #include "Rigidbody.h"
 #include "Neighborhood.h"
+#include "Sprite.h"
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -37,11 +38,11 @@ inline Vector2 WrapAroundScreen(Vector2 position)
 }
 
 
-class Agent
+class Agent : public Sprite
 {
 public:
 
-    Agent(Vector2 positon, float angularSpeed, float whiskerLength, float maxAccel, float maxSpeed);
+    Agent(Vector2 positon, float angularSpeed, float whiskerLength, float maxAccel, float maxSpeed,std::string key) ;
 
     ~Agent();
 
