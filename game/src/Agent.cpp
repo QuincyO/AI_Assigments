@@ -16,6 +16,7 @@ Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float max
     {
         detection[i] = false;
     }
+    //texture = LoadTexture("../game/assets/Fish/fish.png");
 }
 
 Agent::~Agent()
@@ -78,9 +79,13 @@ void Agent::Draw()
 {
     Vector2 veloNorm = Normalize(m_fish->velo);
 
+    //DrawTextureEx(texture, GetPosition(), m_fish->rotation, 1, WHITE);
     DrawCircleV(m_fish->pos, 50, BLACK);
-    DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
-    DrawText(TextFormat("Speed: %f.1", Length(m_fish->velo)), 200, 400 + 45, 20, BLACK);
+
+
+
+    //Drawing Neighborhood,Whiskers,Force Vectors
+    DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100,GREEN);
     DrawLineV(m_fish->pos, m_fish->pos + Normalize(m_fish->accel)*100, RED);
     DrawCircleLines(GetPosition().x, GetPosition().y, Neighborhood.slowingRadius, (Neighborhood.inHood) ? GREEN : RED);
     if (Neighborhood.inHood)

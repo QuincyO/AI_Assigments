@@ -84,6 +84,8 @@ private:
     float m_maxAacceleration; // 50 Px/s /s
     float slowingRadius = 150.0f;
     float arrivedRadius = 15.0f;
+    Texture2D texture;
+
 
     float whiskerLength;
 

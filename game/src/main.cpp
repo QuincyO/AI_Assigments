@@ -9,6 +9,7 @@
 #include "Predator.h"
 #include "Steeringbehaviors.h"
 #include <map>
+//#include "TextureManager.h"
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -20,6 +21,7 @@ int main(void)
 {
     srand(time(NULL));
 
+    Texture2D* tex = &LoadTexture("../CreditScore.png");
 
     //Creating bools for GameMode
     std::map<std::string, bool> Mode;
@@ -238,7 +240,7 @@ int main(void)
         }
        
 
-
+        DrawTextureEx(*tex, { 500,500 }, 9, 1, WHITE);
 
         DrawCircleV(mousePOS, radius, RED);
 
