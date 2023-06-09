@@ -80,7 +80,7 @@ void Agent::Draw()
 {
     Vector2 veloNorm = Normalize(m_fish->velo);
 
-    DrawTextureEx(TextureManager::GetTexture("fish"), GetPosition(), m_fish->rotation, 1, WHITE);
+    DrawTexturePro(TextureManager::GetTexture("fish"), GetPosition(), m_fish->rotation, 1, WHITE);
     //DrawCircleV(m_fish->pos, 50, BLACK);
 
 
