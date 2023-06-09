@@ -1,7 +1,7 @@
 #include "TextureManager.h"
 #include <iostream>
 
-std::map<std::string, Texture2D*> TextureManager::s_textures;
+//std::map<std::string, Texture2D*> TextureManager::s_textures;
 
 Texture2D* TextureManager::Load(const char* path, const std::string key)
 {
