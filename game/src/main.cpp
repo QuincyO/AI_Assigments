@@ -2,6 +2,7 @@
 #include "Math.h"
 #include <iostream>
 #include <vector>
+#include "TextureManager.h"
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -176,8 +177,6 @@ public:
 
     void Arrive(Vector2 const  targetPosition)
     {
-        
-
         if (Length(targetPosition - m_fish->pos) < 480)
             m_slowingRatio = (Length(targetPosition - m_fish->pos) / 480);
         else if(Length(targetPosition - m_fish->pos) < 60)
@@ -191,7 +190,7 @@ public:
     {
         Vector2 veloNorm = Normalize(m_fish->velo);
 
-        DrawCircleV(m_fish->pos, circleRadius, BLACK);
+        //DrawCircleV(m_fish->pos, circleRadius, BLACK);
         DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
         for (int i = 0; i < whiskerCount; i++)
         {
@@ -200,7 +199,7 @@ public:
         }
     }
 
-private:
+public:
     float m_maxSpeed; // 350 Px/s 
     float m_maxAacceleration; // 50 Px/s /s
     float m_slowingRatio;
@@ -233,9 +232,6 @@ private:
 
 
 
-
-
-
 int main(void)
 {
     std::vector<Agent*> agents;
@@ -244,6 +240,11 @@ int main(void)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
     rlImGuiSetup(true);
     SetTargetFPS(60);
+
+    TextureManager gameTextures;
+
+    gameTextures.Load("../game/assets/Fish/fish.png", "fishTexture");
+    gameTextures.Load("../game/assets/Fish/obstacle.png", "obstacleTexture");
 
     float timer = 0;
 
@@ -261,6 +262,9 @@ int main(void)
 
     Vector2 mousePOS = { 0,0 };
 
+    Rectangle fishsrc = { 0,0,64,64 };
+
+
     while (!WindowShouldClose())
     {
         BeginDrawing();
@@ -271,7 +275,8 @@ int main(void)
         mousePOS = GetMousePosition();
 
 
-
+        Rectangle fishdst = { fish1->m_fish->pos.x, fish1->m_fish->pos.y, 64, 64 };
+        Vector2 fishOrigin = { fishdst.width / 2, fishdst.height / 2 };
 
         float angle = AngleFromVector(direction);
 
@@ -309,6 +314,8 @@ int main(void)
         fish1->Arrive(mousePOS);
 
         fish1->Update(dt);
+        if (Length(mousePOS - fish1->m_fish->velo) < 30)
+            fish1->m_fish->velo = { 0,0 };
         fish1->Draw();
        
 
@@ -320,6 +327,11 @@ int main(void)
         DrawCircleV(mousePOS, radius, RED);
         DrawCircleV(position, 25, BLUE);
         DrawCircleV(food1->pos, 40, YELLOW);
+
+
+
+        DrawTexturePro(gameTextures.textures["fishTexture"], fishsrc, fishdst, fishOrigin, 1, RED);
+        DrawTexturePro(gameTextures.textures["obstacleTexture"], { 0,0,64,64 }, { food1->pos.x, food1->pos.y, 64, 64 }, { food1->pos.x, food1->pos.y }, 1, RED);
 
         //    DrawLineV(position, position + Vector2{100,0}, BLACK);
         //    DrawLineV(position, position + direction *100, PINK);
