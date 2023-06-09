@@ -14,12 +14,11 @@
 #define SCREEN_HEIGHT 720
 
 
-
-
-
 int main(void)
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GAME3001 - Assignment 1");
+    Image icon = LoadImage("../game/assets/Fish/fish.png");
+    SetWindowIcon(icon);
     rlImGuiSetup(true);
     SetTargetFPS(60);
     srand(time(NULL));
@@ -29,7 +28,6 @@ int main(void)
     TextureManager::Load("../game/assets/Fish/enemy.png", "enemy");
     TextureManager::Load("../game/assets/Fish/obstacle.png", "rock");
     
-
     //Creating bools for GameMode
     std::map<std::string, bool> Mode;
     Mode.emplace("Off", false);
@@ -38,10 +36,8 @@ int main(void)
     Mode.emplace("Flee", false);
     Mode.emplace("Avoid", false);
 
-
     std::vector<GameObject*> objects;
     std::vector<Agent*> agents;
-
 
     //Randomizing TopSpeed and Accleration Of fish
     for (int i = 0; i < 15; i++)
@@ -62,14 +58,10 @@ int main(void)
         agents.push_back(new Agent(tempPos, 100, 100, randomMaxAccel, randomMaxSpeed,"fish"));
     }
 
-
-
-
     float timer = 0;
 
     const float radius = 30;
     const float whiskerLength = 300;
-
 
     Vector2 position = { SCREEN_WIDTH / 2,SCREEN_HEIGHT / 2 };//in px
     Vector2 velocity = { 0,0 }; //In px/s
@@ -77,7 +69,6 @@ int main(void)
     float maxAccel = 150;
     Vector2 acceleration = { 0,0 }; //In px/s/s
     Vector2 direction = { 13.0f,25.0f };
-
 
     Vector2 mousePOS = { 0,0 };
         bool seek = false;
@@ -94,16 +85,13 @@ int main(void)
         const float dt = GetFrameTime();
         mousePOS = GetMousePosition();
 
-
-
-
         //  ImGui::SliderFloat2("position", &(position.x), 0, SCREEN_WIDTH);
         //  ImGui::SliderFloat2("velocity", &(velocity.x), -maxSpeed, maxSpeed);
         //  ImGui::SliderFloat2("Acceleration", &(acceleration.x), -maxAccel, maxAccel);
         //  ImGui::SliderFloat("Max Acceleration", &maxAccel, 1, 1500); 
         //  ImGui::SliderFloat("Max Speed", &maxSpeed, -1, 1500);
 
-
+        //****SET MODE****
         if (IsKeyPressed(KEY_ONE))
         {
             for (auto& options : Mode)
@@ -144,8 +132,7 @@ int main(void)
             }
         }
 
-
-
+        //****MODES****
         if (Mode["Seek"])
         {
             DrawText("Seek Mode", 15, 20, 50, WHITE);
@@ -166,9 +153,6 @@ int main(void)
                 objects.push_back(new Food(mousePOS, 10,"food"));
             }
         }
-
-        
-        
         else if (Mode["Flee"])
         {
 
@@ -187,6 +171,7 @@ int main(void)
             }
         }
 
+        //****UPDATE AGENTS****
         for (Agent* fish : agents)
         {
 
@@ -227,6 +212,7 @@ int main(void)
 
         }
 
+        //****DRAW****
         for (GameObject* object : objects)
         {
             object->Draw();
@@ -251,8 +237,6 @@ int main(void)
 
 
         DrawCircleV(mousePOS, radius, RED);
-
-
 
         timer += dt;
         rlImGuiEnd();
