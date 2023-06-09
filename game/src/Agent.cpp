@@ -12,6 +12,10 @@ Agent::Agent(Vector2 positon, float angularSpeed, float whiskerLength, float max
     whiskerAngleL2 = fmodf(m_fish->rotation - 30 + 360, 360.0f);
     whiskerAngleR1 = fmodf(m_fish->rotation + 15 + 360, 360.0f);
     whiskerAngleR2 = fmodf(m_fish->rotation + 30 + 360, 360.0f);
+    for (int i = 0; i < whiskerCount; i++)
+    {
+        detection[i] = false;
+    }
 }
 
 Agent::~Agent()
@@ -39,6 +43,23 @@ void Agent::UpdateWhiskers()
     whiskers[2] = VectorFromAngleDegrees(whiskerAngleR1) * whiskerLength;
     whiskers[3] = VectorFromAngleDegrees(whiskerAngleR2) * whiskerLength;
 }
+
+
+void Agent::Update(Vector2 accel,float deltaTime)
+{
+    m_fish->rotation = AngleFromVector(Normalize(m_fish->velo));
+
+    m_fish->accel = Normalize(accel)*m_maxAacceleration;
+    UpdateWhiskers();
+    float MagOfVelo = Length(m_fish->velo);
+    if (MagOfVelo > m_maxSpeed)
+    {
+        m_fish->velo = m_fish->velo * (m_maxSpeed / MagOfVelo);
+
+    };
+    Integrate(deltaTime);
+}
+
 
 void Agent::Update(float deltaTime)
 {

@@ -58,29 +58,9 @@ public:
 
 
     bool CheckWhiskerCollision( int index,Vector2 targetPosition);
-
-    void Avoid(Vector2 obstacle, float deltaTime, float radiusOfObstacle)
-    {
-        //direction = Rotate(direction, 50 * dt * DEG2RAD);
-
-        for (int i = 0; i < whiskerCount; i++)
-        {
-            detection[i] = CheckCollisionLineCircle(m_fish->pos, obstacle, whiskers[i], radiusOfObstacle);
-        }
-
-        if (detection[1] || detection[0])
-        {
-            m_fish->velo = Rotate(m_fish->velo, m_fish->angularSpeed * deltaTime * DEG2RAD);
-        }
-
-        if (detection[2] || detection[3])
-        {
-            m_fish->velo = Rotate(m_fish->velo, -m_fish->angularSpeed * deltaTime * DEG2RAD);
-        }
-
-    };
-
     void UpdateWhiskers();
+
+
     void Integrate(float deltaTime)
     {
         m_fish->pos = m_fish->pos + (m_fish->velo * deltaTime) + ((m_fish->accel * 0.5f) * deltaTime * deltaTime);
@@ -91,25 +71,7 @@ public:
 
     //Updates Movement
     void Update(float deltaTime);
-
-    Vector2 Seek(Vector2 targetPosition,float dt)
-    {
-        Vector2 direction2Target = targetPosition - m_fish->pos;
-
-        Vector2 desiredVelocity = Normalize(direction2Target) * GetMaxSpeed();
-
-        Vector2 deltaV = desiredVelocity - GetVelo();
-
-        Vector2 desiredAcceleration = Normalize(deltaV) * GetMaxAccleration();
-        m_fish->accel = desiredAcceleration;
-        return desiredAcceleration;
-    }
-
-    Vector2 Flee(float deltaTime, Vector2 targetPosition)
-    {
-        Vector2 deltaAccel = (Normalize(targetPosition - m_fish->pos) * m_maxSpeed  - m_fish->velo) * -1;
-        return deltaAccel;
-    }
+    void Update(Vector2 accleration, float deltaTime);
 
 
 

@@ -8,8 +8,8 @@ private:
 	int eatSpeed;
 
 public:
-	Food(Texture2D texture, Vector2 position, int width, int height)
-		: GameObject(texture, position, width, height)
+	Food( Vector2 position, int width, int height)
+		: GameObject( position, width, height)
 		, foodPoints { 100 }
 		, eatSpeed { 5 }
 	{

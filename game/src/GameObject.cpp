@@ -1,8 +1,8 @@
 #include "GameObject.h"
 
-GameObject::GameObject(Texture2D texture, Vector2 position, int width, int height)
+GameObject::GameObject(Vector2 position,int hp, int width, int height)
 {
-	this->texture = texture;
+	this->hp = hp;
 	this->position = position;
 	this->width = width;
 	this->height = height;

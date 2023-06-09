@@ -6,6 +6,8 @@ class ModeManager
 private:
 	ModeManager();
 	
+	
+
 	int currentMode;
 	
 public:
