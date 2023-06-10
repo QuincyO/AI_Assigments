@@ -19,6 +19,7 @@ int main(void)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GAME3001 - Assignment 1");
     Image icon = LoadImage("../game/assets/Fish/fish.png");
     SetWindowIcon(icon);
+    
     rlImGuiSetup(true);
     SetTargetFPS(60);
     srand(time(NULL));

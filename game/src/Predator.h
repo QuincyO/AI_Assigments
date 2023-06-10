@@ -10,6 +10,6 @@ public:
 	}
 
 	ObjectType GetType() const { return ObjectType::Enemy; }
-	void Draw() override;
+	void Draw();
 };
 
