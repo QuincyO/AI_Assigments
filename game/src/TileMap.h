@@ -10,6 +10,7 @@
 #define MAP_HEIGHT (SCREEN_HEIGHT/64)
 
 using namespace std;
+
 enum class Tile 
 {
 	Floor = 0, //Floor tiles can be walked on
@@ -17,9 +18,6 @@ enum class Tile
 	Count
 
 };
-
-
-
 
 class Tilemap
 {
@@ -64,9 +62,8 @@ public:
 	Vector2 ScreenPosToTilePos(Vector2 postionOnScreen);//Find a tile coordinate given a position on the screen over a tile
 	
 	bool IsTraversible(Vector2 tilePosition);
+	std::vector<Vector2> GetAllTraversibleTiles();
 
-	void DrawBorders(Color color = BLACK);
-	void DrawTiles();
 	void RegnerateLevel(int chanceofWall = 50);
 
 	Vector2 GetTileCenter(Vector2 tilePosition);
@@ -76,13 +73,15 @@ public:
 	void MoveSpriteDown();
 	void MoveSpriteRight();
 
+	Vector2 Respawn();
 	void ReplacePlayer();
 
+	void DrawTiles();
+	void DrawBorders(Color color = BLACK);
 	void DrawNodes();
-
-	void DrawConnections();
-
 	void DrawSprite();
+	void DrawTextures(Texture2D texture);
+	
 
 	std::vector<Vector2> GetTraversibleTilesAdjacentTo(Vector2 tilePosition);
 

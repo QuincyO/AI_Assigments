@@ -39,6 +39,22 @@ bool Tilemap::IsTraversible(Vector2 tilePosition)
 	return false;
 }
 
+std::vector<Vector2> Tilemap::GetAllTraversibleTiles()
+{
+	std::vector<Vector2> allTraversibleTiles;
+
+	for (int x = 0; x < MAP_WIDTH; x++)
+	{
+		for (int y = 0; y < MAP_HEIGHT; y++)
+		{
+			Vector2 temp = { x, y };
+			if (IsTraversible(temp)) allTraversibleTiles.push_back(temp);
+		}
+	}
+
+	return allTraversibleTiles;
+}
+
 void Tilemap::DrawBorders(Color color)
 {
 	for (int x = 0; x < GetGridWidth()+1; x++)
@@ -100,7 +116,6 @@ void Tilemap::MoveSpriteUp()
 	{
 		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
 	}
-	
 }
 
 void Tilemap::MoveSpriteLeft()
@@ -125,7 +140,6 @@ void Tilemap::MoveSpriteDown()
 	{
 		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
 	}
-
 }
 
 void Tilemap::MoveSpriteRight()
@@ -137,6 +151,21 @@ void Tilemap::MoveSpriteRight()
 	if (IsTraversible(tileCord))
 	{
 		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
+	}
+}
+
+Vector2 Tilemap::Respawn()
+{
+	while (true)
+	{
+		Vector2 spawn;
+		spawn.x = (rand() % MAP_WIDTH + 1) - 1;
+		spawn.y = (rand() % MAP_HEIGHT + 1) - 1;
+
+		if (IsTraversible(spawn))
+		{
+			return spawn;
+		}
 	}
 }
 
@@ -159,7 +188,6 @@ void Tilemap::ReplacePlayer()
 		}
 			if (breakFlag) break;
 	}
-
 }
 
 void Tilemap::DrawNodes()
@@ -179,17 +207,9 @@ void Tilemap::DrawNodes()
 
 					DrawLineV(GetTileCenter(tempVec), GetTileCenter(connection), GREEN);
 				}
-					
-
-				
 			}
 		}
 	}
-}
-
-void Tilemap::DrawConnections()
-{
-
 }
 
 void Tilemap::DrawSprite()
@@ -197,6 +217,23 @@ void Tilemap::DrawSprite()
 	Vector2 origin = { player.GetDest().x + (player.GetDest().width / 2)
 					, player.GetDest().y + (player.GetDest().height / 2) };
 	DrawTexturePro(player.GetTexture(), player.GetSource(), player.GetDest(), {}, 0, WHITE);
+}
+
+void Tilemap::DrawTextures(Texture2D texture)
+{
+	for (int x = 0; x < MAP_WIDTH; x++)
+	{
+		for (int y = 0; y < MAP_HEIGHT; y++)
+		{
+			Tile tileType = tiles[x][y]; //Get what type of tile is here.
+			Vector2 tilePosition = TilePosToScreenPos(x, y);
+			Rectangle src;
+			if (tileType == Tile::Floor) src = { 173, 232, 32, 32 };
+			else if (tileType == Tile::Wall) src = { 304, 165, 32, 32 };
+
+			DrawTexturePro(texture, src, { tilePosition.x, tilePosition.y, tileSizeX, tileSizeY }, { 0,0 }, 0.0f, WHITE);
+		}
+	}
 }
 
 std::vector<Vector2> Tilemap::GetTraversibleTilesAdjacentTo(Vector2 tilePosition)

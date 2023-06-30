@@ -1,231 +1,24 @@
 #include "rlImGui.h"
 #include "Math.h"
 #include "TileMap.h"
+#include "Pathfinder.h"
 #include <iostream>
 #include <vector>
 
-
-//        position = position + (m_fish->GetVelocity() * deltaTime) + ((acceleration * 0.5f) * deltaTime * deltaTime);
-//        position = WrapAroundScreen(position);
-//        m_fish->SetPosition(position);
-//        m_fish->SetVelocity(m_fish->GetVelocity() + acceleration * deltaTime);
-
-bool CheckCollisionLineCircle(Vector2 agentPosition,Vector2 obstaclePosition,Vector2 lineToCheckAgainst,float circleRadius)
-{
-    Vector2 NearestPointOnVector = NearestPoint(agentPosition, agentPosition + lineToCheckAgainst, obstaclePosition);
-
-    float distanceFromObstacleToPoint = Distance(NearestPointOnVector, obstaclePosition);
-    return  (distanceFromObstacleToPoint <= circleRadius);
-}
-
-Vector2 WrapAroundScreen(Vector2 position)
-{
-    Vector2 outPosition =
-    {
-        fmodf(position.x + SCREEN_WIDTH,SCREEN_WIDTH),
-        fmodf(position.y + SCREEN_HEIGHT,SCREEN_HEIGHT)
-    };
-    return outPosition;
-}
-float AngleFromVector(Vector2 direction)
-{
-    float angle = atan2f(direction.y, direction.x) * RAD2DEG;
-    angle = fmodf(angle + 360, 360.0f);
-    return angle;
-}
-
-Vector2 VectorFromAngleDegrees(float angleDegrees)
-{
-    return Vector2{ cosf(angleDegrees * DEG2RAD),sinf(angleDegrees * DEG2RAD) };
-}
-
-struct RigidBody
-{
-    Vector2 pos = {SCREEN_WIDTH/2,SCREEN_HEIGHT/2};
-    Vector2 accel = {};
-    Vector2 velo = {};
-    Vector2 dir = {};
-    float rotation;
-    float angularSpeed;
-};
-
-
-
-class Agent
-{
-public:
-
-
-    Agent(float r1,float r2,float l1,float l2,float maxAccel,float maxSpeed)
-    {
-        m_fish = new RigidBody();
-        m_maxAacceleration = maxAccel;
-        m_maxSpeed = maxSpeed;
-        whiskerLengthL1 = l1;
-        whiskerLengthL2 = l2;
-        whiskerLengthR1 = r1;
-        whiskerLengthR2 = r2;
-        m_fish->angularSpeed = 100;
-
-        whiskers = new Vector2[whiskerCount];
-        detection = new bool [whiskerCount];
-
-    }
-
-    ~Agent()
-    {
-        delete m_fish;
-        m_fish = nullptr;
-    }
-
-
-
-
-
-    void Avoid(Vector2 obstacle,float deltaTime,float radiusOfObstacle)
-    {
-        //direction = Rotate(direction, 50 * dt * DEG2RAD);
-
-        for (int i = 0; i < whiskerCount; i++)
-        {
-            detection[i] = CheckCollisionLineCircle(m_fish->pos, obstacle, whiskers[i], radiusOfObstacle);
-        }
-        
-        if (detection[1] || detection[0])
-        {
-            m_fish->velo = Rotate(m_fish->velo, m_fish->angularSpeed * deltaTime * DEG2RAD);
-        }
-
-        if (detection[2] || detection[3])
-        {
-            m_fish->velo = Rotate(m_fish->velo, -m_fish->angularSpeed * deltaTime * DEG2RAD);
-        }
-
-    }
-
-    void UpdateWhiskers()
-    {
-        whiskerAngleL1 = fmodf(m_fish->rotation - 15 + 360, 360.0f);
-        whiskerAngleL2 = fmodf(m_fish->rotation - 30 + 360, 360.0f);
-        whiskerAngleR1 = fmodf(m_fish->rotation + 15 + 360, 360.0f);
-        whiskerAngleR2 = fmodf(m_fish->rotation + 30 + 360, 360.0f);
-
-
-        whiskers[0] = VectorFromAngleDegrees(whiskerAngleL1) * whiskerLengthL1;
-        whiskers[1] = VectorFromAngleDegrees(whiskerAngleL2) * whiskerLengthL2;
-        whiskers[2] = VectorFromAngleDegrees(whiskerAngleR1) * whiskerLengthR1;
-        whiskers[3] = VectorFromAngleDegrees(whiskerAngleR2) * whiskerLengthR2;
-
-  
-
-
-    }
-
-    //Updates Movement
-    void Update(float deltaTime)
-    {
-         m_fish->rotation = AngleFromVector(Normalize(m_fish->velo));
-        UpdateWhiskers();
-
-
-
-        
-
-
-
-       float MagOfVelo = Length(m_fish->velo);
-       if (MagOfVelo > m_maxSpeed)
-       {
-           m_fish->velo = m_fish->velo * (m_maxSpeed / MagOfVelo);
-       };
-       m_fish->pos = m_fish->pos + (m_fish->velo * deltaTime) + ((m_fish->accel * 0.5f) * deltaTime * deltaTime);
-       m_fish->velo = m_fish->velo + m_fish->accel * deltaTime;
-       m_fish->pos = WrapAroundScreen(m_fish->pos);
-       m_fish->accel = {};
-
-      //  m_fish->dir = RotateTowards(m_fish->dir, Normalize(m_fish->velo), m_fish->angularSpeed * deltaTime);
-    }
-
-    
-    //Returns Acceleration Vector Towards obstacle
-    Vector2 Seek(Vector2 const  targetPosition, float deltaTIme)
-    {
-        Vector2 deltaAccel = Normalize(targetPosition - m_fish->pos) * m_maxSpeed - m_fish->velo;
-
-         m_fish->rotation = AngleFromVector(targetPosition-m_fish->pos);
-      //  m_fish->dir = VectorFromAngleDegrees(m_fish->rotation);
-        m_fish->accel = deltaAccel;
-        return deltaAccel;       
-    }
-
-
-    Vector2 Flee(float deltaTime, Vector2 targetPosition)
-    {
-        Vector2 deltaAccel = (Normalize(targetPosition - m_fish->pos) * m_maxSpeed - m_fish->velo)  -1;
-        return deltaAccel;
-    }
-
-    void Draw()
-    {
-        Vector2 veloNorm = Normalize(m_fish->velo);
-
-        DrawCircleV(m_fish->pos, circleRadius, BLACK);
-       // DrawLineV(m_fish->pos, m_fish->pos + veloNorm * 100, RED);
-        for (int i = 0; i < whiskerCount; i++)
-        {
-            DrawLineV(m_fish->pos, m_fish->pos + whiskers[i],(detection[i]) ? RED:GREEN);
-
-        }
-    }
-
-private:
-    float m_maxSpeed; // 350 Px/s 
-    float m_maxAacceleration; // 50 Px/s /s
-    float whiskerLengthL1;
-    float whiskerLengthL2;
-    float whiskerLengthR1;
-    float whiskerLengthR2;
-    RigidBody* m_fish;
-
-    float circleRadius = 40;
-
-
-    float whiskerAngleL1 ;
-    float whiskerAngleL2 ;
-    float whiskerAngleR1 ;
-    float whiskerAngleR2 ;
-
-    int whiskerCount = 4;
-
-    bool* detection;
-    Vector2* whiskers;
-
-    Vector2 whiskerLeft1 ;
-    Vector2 whiskerLeft2 ;
-    Vector2 whiskerRight1;
-    Vector2 whiskerRight2;
-};
-
-
-
-
-
-
-
 int main(void)
 {
-    
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GAME3001 - Assignment 2");
     rlImGuiSetup(true);
     SetTargetFPS(60);
+   
     Tilemap map("../game/assets/p1_walk01.png");
     map.player.SetSize(64, 64);
+    
     float timer = 0;
 
     int wallChance = 20;
     map.RegnerateLevel(wallChance);
-    bool imGui = false;
-
+    
     Vector2 position = { SCREEN_WIDTH/2,SCREEN_HEIGHT/2 };//in px
     Vector2 velocity = { 0,0 }; //In px/s
     float maxSpeed = 10;
@@ -233,8 +26,17 @@ int main(void)
     Vector2 acceleration = { 0,0 }; //In px/s/s
     Vector2 direction = { 13.0f,25.0f };
 
+    Vector2 playerPosition = map.Respawn();
+
+    bool imGui = false;
+    bool useGUI = false;
+    bool showTextures = false;
+    bool showNodes = false;
+    bool showPath = true;
 
     Vector2 mousePOS = { 0,0 };
+
+    Pathfinder pathfinder = Pathfinder();
 
     while (!WindowShouldClose())
     {
@@ -250,6 +52,43 @@ int main(void)
                 {
                     map.RegnerateLevel(wallChance);
                 }
+                if (ImGui::Button("Toggle Textures"))
+                {
+                    showTextures = !showTextures;
+                }
+                if (ImGui::Button("Toggle Node Visuals"))
+                {
+                    showNodes = !showNodes;
+                }
+                if (ImGui::Button("Toggle Pathfinder Visuals"))
+                {
+                    showPath = !showPath;
+                }
+            }
+
+            //Pathfinding
+            Vector2 mouseTilePos = map.ScreenPosToTilePos(GetMousePosition());
+            if (map.IsInsideGrid(mouseTilePos))
+            {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && map.IsTraversible(mouseTilePos))
+                {
+                    pathfinder = Pathfinder(&map, playerPosition, mouseTilePos);
+                }
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && map.IsTraversible(mouseTilePos))
+                {
+                    pathfinder = Pathfinder(&map, playerPosition, mouseTilePos);
+                    pathfinder.SolvePath();
+                }
+            }
+            if (pathfinder.map != nullptr)
+            {
+                if (IsKeyPressed(KEY_SPACE))
+                {
+                    pathfinder.ProcessNextIterationFunctional();
+                }
+
+                if (showPath) pathfinder.DrawCurrentState();
             }
 
             if (IsKeyPressed(KEY_W)) map.MoveSpriteUp();
@@ -257,15 +96,15 @@ int main(void)
             if (IsKeyPressed(KEY_A)) map.MoveSpriteLeft();
             if (IsKeyPressed(KEY_D)) map.MoveSpriteRight();
             
-
         const float dt = GetFrameTime();
         mousePOS = GetMousePosition();
+
+        
+        if (showTextures) map.DrawTextures(tileTexture);
         map.DrawTiles();
         map.DrawBorders();
-        map.DrawNodes();
+        if (showNodes) map.DrawNodes();
         map.DrawSprite();
-
-
 
         timer += dt;
         rlImGuiEnd();
@@ -273,7 +112,7 @@ int main(void)
     }
 
     CloseWindow();
-    //If you are curious about what numbers the hash function produces, try puttin this block of test code in main
+   
     return 0;
 
 }
