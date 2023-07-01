@@ -44,6 +44,9 @@ int main(void)
         ClearBackground(WHITE);
             rlImGuiBegin();
 
+            const float dt = GetFrameTime();
+            mousePOS = GetMousePosition();
+
             if (IsKeyPressed(KEY_GRAVE)) imGui = !imGui;
             if (imGui)
             {
@@ -91,16 +94,12 @@ int main(void)
                 if (showPath) pathfinder.DrawCurrentState();
             }
 
-            if (IsKeyPressed(KEY_W)) map.MoveSpriteUp();
-            if (IsKeyPressed(KEY_S)) map.MoveSpriteDown();
-            if (IsKeyPressed(KEY_A)) map.MoveSpriteLeft();
-            if (IsKeyPressed(KEY_D)) map.MoveSpriteRight();
-            
-        const float dt = GetFrameTime();
-        mousePOS = GetMousePosition();
 
-        
-        if (showTextures) map.DrawTextures(tileTexture);
+            
+
+
+        Texture2D tileTexture;
+       // if (showTextures) map.DrawTextures(tileTexture);
         map.DrawTiles();
         map.DrawBorders();
         if (showNodes) map.DrawNodes();

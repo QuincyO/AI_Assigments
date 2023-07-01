@@ -1,6 +1,5 @@
 #pragma once
 #include "Rigidbody.h"
-#include "Neighborhood.h"
 #include "Sprite.h"
 
 #define SCREEN_WIDTH 1280
@@ -79,7 +78,6 @@ public:
     void Draw();
 
     Rigidbody* m_fish;
-    Neighborhood Neighborhood;
 private:
     float m_maxSpeed; // 350 Px/s 
     float m_maxAacceleration; // 50 Px/s /s

@@ -1,4 +1,5 @@
 #pragma once
+#include "TileCoord.h"
 #include "TileMap.h"
 #include <unordered_map>
 #include <string>

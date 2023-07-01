@@ -35,7 +35,6 @@ private:
 	const Vector2 EAST = { 1,0 };
 	const Vector2 WEST = { -1,0 };
 
-	TileCoord* tilePosition;
 	int width = 0;
 	int height = 0;
 vector<vector<Tile>> v_Tiles; //Dynamic Array that can be changed during Runtime

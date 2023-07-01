@@ -227,11 +227,11 @@ void Tilemap::DrawTextures(Texture2D texture)
 		{
 			Tile tileType = tiles[x][y]; //Get what type of tile is here.
 			Vector2 tilePosition = TilePosToScreenPos(x, y);
-			Rectangle src;
+			Rectangle src = {};
 			if (tileType == Tile::Floor) src = { 173, 232, 32, 32 };
 			else if (tileType == Tile::Wall) src = { 304, 165, 32, 32 };
 
-			DrawTexturePro(texture, src, { tilePosition.x, tilePosition.y, tileSizeX, tileSizeY }, { 0,0 }, 0.0f, WHITE);
+			DrawTexturePro(texture, src, { tilePosition.x, tilePosition.y, (float)tileSizeX, (float)tileSizeY }, { 0,0 }, 0.0f, WHITE);
 		}
 	}
 }
