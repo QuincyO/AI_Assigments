@@ -17,6 +17,9 @@ bool Tilemap::IsInsideGrid(TileCoord tilePosition)
 	if (tilePosition.x < MAP_WIDTH && tilePosition.x >= 0 &&
 		tilePosition.y < MAP_HEIGHT && tilePosition.y >= 0)
 		return true;
+	else if (tilePosition.x < (tileSizeX*MAP_WIDTH) && tilePosition.x >= 0 &&
+		tilePosition.y < (tileSizeX * MAP_HEIGHT) && tilePosition.y >= 0)
+		return true;
 	else return false;
 }
 
@@ -27,7 +30,9 @@ Vector2 Tilemap::TilePosToScreenPos(int x, int y)
 
 Vector2 Tilemap::ScreenPosToTilePos(Vector2 postionOnScreen)
 {
-	return { postionOnScreen.x / tileSizeX, postionOnScreen.y / tileSizeY };
+	if (IsInsideGrid(postionOnScreen))
+		return { postionOnScreen.x / tileSizeX, postionOnScreen.y / tileSizeY };
+	else return { -500,-500 };
 }
 
 bool Tilemap::IsTraversible(TileCoord tilePosition)

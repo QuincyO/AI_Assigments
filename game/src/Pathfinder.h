@@ -72,31 +72,12 @@ public:
 
 	void MoveToVisitedSet(TileCoord node)
 	{
-		visited[currentNode] = unvisited[node];
-		unvisited.erase(currentNode);
+		auto tempSet = unvisited[node];
+ 		visited[currentNode] = tempSet;
+		unvisited.erase(node);
 	}
 
-	float GetTotalCostToReach(TileCoord pos)
-	{
-		float totalCost = 0.0f;
-		TileCoord current = pos;
-		while (current != TileCoord{ -1,-1 })
-		{
-			totalCost += 1.0f;
-			auto it = cheapestEdgeTo.find(current);
-			if (it != cheapestEdgeTo.end())
-			{
-				current = it->second;
-
-			}
-			else
-			{
-				current = TileCoord{ -1,-1 };
-			}
-		}
-		return totalCost;
-
-	}
+	float GetTotalCostToReach(TileCoord pos) { return unvisited[pos]; }
 
 
 	void SetCostToReach(TileCoord pos, float newCost) { unvisited[pos] = newCost; }
@@ -110,30 +91,34 @@ public:
 	{
 		if (IsCompleted()) return;
 
-		currentNode = unvisited.begin()->first;
-		auto Test = map->GetAllTraversibleTiles();
-		unvisited.erase(currentNode);
+		currentNode = GetLowestCostIn(unvisited).first;
 
-		visited.insert(std::make_pair(currentNode, GetCostForTile(currentNode)));
 		if (currentNode == goalNode)
 		{
-			return;
+			//return;
 		}
+		visited;
+		auto Test = map->GetAllTraversibleTiles();
 		auto TEST2 = map->GetTraversibleTilesAdjacentTo(currentNode);
-		for (auto adjacent : map->GetTraversibleTilesAdjacentTo(currentNode))
+		for (const auto& adjacent : map->GetTraversibleTilesAdjacentTo(currentNode))
 		{
 			if (IsVisited(adjacent)) continue;
-			float costThisWay = GetTotalCostToReach(currentNode) + 1;
+
+
+			float costThisWay = GetTotalCostToReach(currentNode) + GetCostForTile(adjacent);
 
 			float oldCost = GetTotalCostToReach(adjacent);
 
-			if (costThisWay < TotalCost)
+			if (costThisWay < oldCost)
 			{
-				cheapestEdgeTo.insert(std::make_pair(adjacent, currentNode));
-
+				SetCostToReach(adjacent, costThisWay);
+				cheapestEdgeTo[adjacent] = currentNode;
 			}
 
+
 		}
+		MoveToVisitedSet(currentNode);
+
 	}
 
 	
@@ -146,7 +131,7 @@ public:
 			ProcessNextIterationFunctional();
 		}
 
-		return IsSolved();
+ 		return IsSolved();
 	}
 
 	std::list<TileCoord> GetSolution()

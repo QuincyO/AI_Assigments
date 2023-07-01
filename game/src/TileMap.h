@@ -4,10 +4,10 @@
 #include "TileCoord.h"
 #include "raylib.h"
 #include "Sprite.h"
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
-#define MAP_WIDTH (SCREEN_WIDTH/64)
-#define MAP_HEIGHT (SCREEN_HEIGHT/64)
+#define SCREEN_WIDTH 1500
+#define SCREEN_HEIGHT 800
+#define MAP_WIDTH (int)(1280/64)
+#define MAP_HEIGHT (int)(720/64)
 
 using namespace std;
 
