@@ -9,13 +9,15 @@ class Pathfinder
 public:
 	Tilemap* map = nullptr;
 private:
-	std::unordered_map<Vector2, float,		std::hash<Vector2>, std::equal_to<Vector2>> unvisited;
-	std::unordered_map<Vector2, float,		std::hash<Vector2>, std::equal_to<Vector2>> visited;
-	std::unordered_map<Vector2, Vector2,	std::hash<Vector2>, std::equal_to<Vector2>> cheapestEdgeTo;
+	std::unordered_map<TileCoord, float, std::hash<TileCoord>, std::equal_to<TileCoord>> unvisited;
+	std::unordered_map<TileCoord, float, std::hash<TileCoord>, std::equal_to<TileCoord>> visited;
+	std::unordered_map<TileCoord, TileCoord, std::hash<TileCoord>, std::equal_to<TileCoord>> cheapestEdgeTo;
 
-	Vector2 startNode;
-	Vector2 goalNode;
-	Vector2 currentNode;
+	TileCoord startNode;
+	TileCoord goalNode;
+	TileCoord currentNode;
+
+	float TotalCost = 0;
 
 public:
 	Pathfinder() //Default constructor
@@ -23,7 +25,7 @@ public:
 
 	}
 
-	Pathfinder(Tilemap* levelToNavigate, Vector2 startTile, Vector2 endTile) //Constructor to set up new start conditions
+	Pathfinder(Tilemap* levelToNavigate, TileCoord startTile, TileCoord endTile) //Constructor to set up new start conditions
 	{
 		map = levelToNavigate;
 		startNode = startTile;
@@ -39,20 +41,20 @@ public:
 
 		//Reset costs
 		unvisited.clear();
-		for (Vector2 position : map->GetAllTraversibleTiles())
+		for (TileCoord position : map->GetAllTraversibleTiles())
 		{
 			unvisited[position] = INFINITY;
 		}
 		unvisited[startNode] = 0;
 	}
 
-	std::pair<Vector2, float> GetLowestCostIn(std::unordered_map<Vector2, float> set)
+	std::pair<TileCoord, float> GetLowestCostIn(std::unordered_map<TileCoord, float> set)
 	{
-		Vector2 cheapestPosition = { -1, -1 };
+		TileCoord cheapestPosition = { -1, -1 };
 		float lowestCost = INFINITY;
 		for (auto nodeValuePair : set)
 		{
-			Vector2 tile = nodeValuePair.first;
+			TileCoord tile = nodeValuePair.first;
 			float cost = nodeValuePair.second;
 
 			if (cost < lowestCost)
@@ -64,20 +66,42 @@ public:
 		return { cheapestPosition, lowestCost };
 	}
 
-	bool IsVisited(Vector2 pos) const { return visited.count(pos); }
+	bool IsVisited(TileCoord pos) const { return visited.count(pos); }
 	bool IsSolved() const { return IsVisited(goalNode); }
 	bool IsCompleted() { return IsVisited(goalNode) || GetLowestCostIn(unvisited).second == INFINITY; }
 
-	void MoveToVisitedSet(Vector2 node)
+	void MoveToVisitedSet(TileCoord node)
 	{
-		visited[currentNode] = unvisited[currentNode];
+		visited[currentNode] = unvisited[node];
 		unvisited.erase(currentNode);
 	}
 
-	float GetTotalCostToReach(Vector2 pos) { return unvisited[pos]; }
-	void SetCostToReach(Vector2 pos, float newCost) { unvisited[pos] = newCost; }
+	float GetTotalCostToReach(TileCoord pos)
+	{
+		float totalCost = 0.0f;
+		TileCoord current = pos;
+		while (current != TileCoord{ -1,-1 })
+		{
+			totalCost += 1.0f;
+			auto it = cheapestEdgeTo.find(current);
+			if (it != cheapestEdgeTo.end())
+			{
+				current = it->second;
 
-	float GetCostForTile(Vector2 tile) //CHECK THIS
+			}
+			else
+			{
+				current = TileCoord{ -1,-1 };
+			}
+		}
+		return totalCost;
+
+	}
+
+
+	void SetCostToReach(TileCoord pos, float newCost) { unvisited[pos] = newCost; }
+
+	float GetCostForTile(TileCoord tile) //CHECK THIS
 	{
 		return 1.0f;
 	}
@@ -85,24 +109,34 @@ public:
 	void ProcessNextIterationFunctional()
 	{
 		if (IsCompleted()) return;
-		currentNode = GetLowestCostIn(unvisited).first;
 
+		currentNode = unvisited.begin()->first;
+		auto Test = map->GetAllTraversibleTiles();
+		unvisited.erase(currentNode);
+
+		visited.insert(std::make_pair(currentNode, GetCostForTile(currentNode)));
+		if (currentNode == goalNode)
+		{
+			return;
+		}
+		auto TEST2 = map->GetTraversibleTilesAdjacentTo(currentNode);
 		for (auto adjacent : map->GetTraversibleTilesAdjacentTo(currentNode))
 		{
 			if (IsVisited(adjacent)) continue;
-
-			float costThisWay = GetTotalCostToReach(currentNode) + 1.0f /*GetCostForTile(adjacent)*/; // Plus 1
+			float costThisWay = GetTotalCostToReach(currentNode) + 1;
 
 			float oldCost = GetTotalCostToReach(adjacent);
-			if (costThisWay < oldCost)
+
+			if (costThisWay < TotalCost)
 			{
-				SetCostToReach(adjacent, costThisWay);
-				cheapestEdgeTo[adjacent] = currentNode;
+				cheapestEdgeTo.insert(std::make_pair(adjacent, currentNode));
+
 			}
+
 		}
-		
-		MoveToVisitedSet(currentNode);
 	}
+
+	
 
 	bool SolvePath() //Runs full algorithm until completion
 	{
@@ -115,9 +149,9 @@ public:
 		return IsSolved();
 	}
 
-	std::list<Vector2> GetSolution()
+	std::list<TileCoord> GetSolution()
 	{
-		std::list<Vector2> solution;
+		std::list<TileCoord> solution;
 		auto currentNode = goalNode;
 		while (currentNode != startNode)
 		{
@@ -138,7 +172,7 @@ public:
 		DrawRectangleLinesEx(recGoal, 10, RED);
 
 		//Draw lines to visited nodes
-		for (Vector2 tile : map->GetAllTraversibleTiles())
+		for (TileCoord tile : map->GetAllTraversibleTiles())
 		{
 			if (IsVisited(tile))
 				DrawLine(map->GetTileCenter(tile).x, map->GetTileCenter(tile).y, 
@@ -146,7 +180,7 @@ public:
 		}
 
 		//Draw solution line
-		for (Vector2 solution : GetSolution())
+		for (TileCoord solution : GetSolution())
 		{
 			Vector2 start = map->GetTileCenter(solution);
 			Vector2 end = map->GetTileCenter(cheapestEdgeTo[solution]);
@@ -155,7 +189,7 @@ public:
 		}
 
 		//Draw costs for unvisited tiles
-		for (Vector2 position : map->GetAllTraversibleTiles())
+		for (TileCoord position : map->GetAllTraversibleTiles())
 		{
 			if (!IsVisited(position))
 			{
@@ -169,7 +203,7 @@ public:
 		}
 
 		//Draw costs for visited tiles
-		for (Vector2 position : map->GetAllTraversibleTiles())
+		for (TileCoord position : map->GetAllTraversibleTiles())
 		{
 			if (IsVisited(position))
 			{

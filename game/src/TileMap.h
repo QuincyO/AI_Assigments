@@ -30,10 +30,10 @@ private:
 
 	Tile tiles[MAP_WIDTH][MAP_HEIGHT]; //Standard array cannot be chaged at runtime
 
-	const Vector2 NORTH = { 0,-1 };
-	const Vector2 SOUTH = { 0,1 };
-	const Vector2 EAST = { 1,0 };
-	const Vector2 WEST = { -1,0 };
+	const TileCoord NORTH = { 0,-1 };
+	const TileCoord SOUTH = { 0,1 };
+	const TileCoord EAST = { 1,0 };
+	const TileCoord WEST = { -1,0 };
 
 	int width = 0;
 	int height = 0;
@@ -52,27 +52,27 @@ public:
 	int GetGridWidth() {return MAP_WIDTH; } //Get Number of columns in the grid
 	int GetGridHeight() { return MAP_HEIGHT; } //Get Number of rows in the grid
 	Tile GetTile(int x, int y); //Get the tile at the specified coordinate in the grid
-	Tile GetTile(Vector2 tilePosition) ; //Get the tile at the specified coordinate in the grid
+	Tile GetTile(TileCoord tilePosition) ; //Get the tile at the specified coordinate in the grid
 	void SetTile(int x, int y, Tile type); //St the tile at the specified coordinate in the grid
 	bool IsInsideGrid(int x, int y); //Returns true of the coordinate is insdie the grid, false otherwise
-	bool IsInsideGrid(Vector2 tilePosition); //Returns true of the coordinate is insdie the grid, false otherwise
-	Vector2 TilePosToScreenPos(Vector2 tilePosition); //Convert from a tile coordinate to a screen position
+	bool IsInsideGrid(TileCoord tilePosition); //Returns true of the coordinate is insdie the grid, false otherwise
+	Vector2 TilePosToScreenPos(TileCoord tilePosition); //Convert from a tile coordinate to a screen position
 	Vector2 TilePosToScreenPos(int x, int y); //Convert from a tile coordinate to a screen positon
 	Vector2 ScreenPosToTilePos(Vector2 postionOnScreen);//Find a tile coordinate given a position on the screen over a tile
 	
-	bool IsTraversible(Vector2 tilePosition);
-	std::vector<Vector2> GetAllTraversibleTiles();
+	bool IsTraversible(TileCoord tilePosition);
+	std::vector<TileCoord> GetAllTraversibleTiles();
 
 	void RegnerateLevel(int chanceofWall = 50);
 
-	Vector2 GetTileCenter(Vector2 tilePosition);
+	Vector2 GetTileCenter(TileCoord tilePosition);
 
 	void MoveSpriteUp( );
 	void MoveSpriteLeft();
 	void MoveSpriteDown();
 	void MoveSpriteRight();
 
-	Vector2 Respawn();
+	TileCoord Respawn();
 	void ReplacePlayer();
 
 	void DrawTiles();
@@ -82,6 +82,6 @@ public:
 	void DrawTextures(Texture2D texture);
 	
 
-	std::vector<Vector2> GetTraversibleTilesAdjacentTo(Vector2 tilePosition);
+	std::vector<TileCoord> GetTraversibleTilesAdjacentTo(TileCoord tilePosition);
 
 };

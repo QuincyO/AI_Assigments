@@ -26,7 +26,7 @@ int main(void)
     Vector2 acceleration = { 0,0 }; //In px/s/s
     Vector2 direction = { 13.0f,25.0f };
 
-    Vector2 playerPosition = map.Respawn();
+    TileCoord playerPosition = map.Respawn();
 
     bool imGui = false;
     bool useGUI = false;
