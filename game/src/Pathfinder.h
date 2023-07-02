@@ -8,14 +8,15 @@ class Pathfinder
 {
 public:
 	Tilemap* map = nullptr;
+	TileCoord startNode;
+	TileCoord goalNode;
+	TileCoord currentNode;
+
 private:
 	std::unordered_map<TileCoord, float, std::hash<TileCoord>, std::equal_to<TileCoord>> unvisited;
 	std::unordered_map<TileCoord, float, std::hash<TileCoord>, std::equal_to<TileCoord>> visited;
 	std::unordered_map<TileCoord, TileCoord, std::hash<TileCoord>, std::equal_to<TileCoord>> cheapestEdgeTo;
 
-	TileCoord startNode;
-	TileCoord goalNode;
-	TileCoord currentNode;
 
 	float TotalCost = 0;
 
@@ -45,6 +46,7 @@ public:
 		{
 			unvisited[position] = INFINITY;
 		}
+		cheapestEdgeTo[startNode] = startNode;
 		unvisited[startNode] = 0;
 	}
 
@@ -73,7 +75,7 @@ public:
 	void MoveToVisitedSet(TileCoord node)
 	{
 		auto tempSet = unvisited[node];
- 		visited[currentNode] = tempSet;
+		visited[currentNode] = tempSet;
 		unvisited.erase(node);
 	}
 
@@ -121,7 +123,7 @@ public:
 
 	}
 
-	
+
 
 	bool SolvePath() //Runs full algorithm until completion
 	{
@@ -130,8 +132,7 @@ public:
 		{
 			ProcessNextIterationFunctional();
 		}
-
- 		return IsSolved();
+		return IsSolved();
 	}
 
 	std::list<TileCoord> GetSolution()
@@ -141,6 +142,7 @@ public:
 		while (currentNode != startNode)
 		{
 			solution.push_front(currentNode);
+			TotalCost += 1.0f;
 			currentNode = cheapestEdgeTo[currentNode];
 		}
 		return solution;
@@ -152,6 +154,8 @@ public:
 		Rectangle recStart = { startNode.x * map->tileSizeX, startNode.y * map->tileSizeY, map->tileSizeX, map->tileSizeY };
 		Rectangle recGoal = { goalNode.x * map->tileSizeX, goalNode.y * map->tileSizeY, map->tileSizeX, map->tileSizeY };
 		Rectangle recCurrent = { currentNode.x * map->tileSizeX, currentNode.y * map->tileSizeY, map->tileSizeX, map->tileSizeY };
+
+
 		DrawRectangleLinesEx(recCurrent, 10, BLUE);
 		DrawRectangleLinesEx(recStart, 10, GREEN);
 		DrawRectangleLinesEx(recGoal, 10, RED);
@@ -160,8 +164,11 @@ public:
 		for (TileCoord tile : map->GetAllTraversibleTiles())
 		{
 			if (IsVisited(tile))
-				DrawLine(map->GetTileCenter(tile).x, map->GetTileCenter(tile).y, 
+			{
+
+				DrawLine(map->GetTileCenter(tile).x, map->GetTileCenter(tile).y,
 					map->GetTileCenter(cheapestEdgeTo[tile]).x, map->GetTileCenter(cheapestEdgeTo[tile]).y, GREEN);
+			}
 		}
 
 		//Draw solution line
@@ -169,7 +176,7 @@ public:
 		{
 			Vector2 start = map->GetTileCenter(solution);
 			Vector2 end = map->GetTileCenter(cheapestEdgeTo[solution]);
-			
+
 			DrawLineEx(start, end, 10, BLUE);
 		}
 
@@ -178,12 +185,20 @@ public:
 		{
 			if (!IsVisited(position))
 			{
-				float cost = unvisited[position];
-				
-				char buffer[30];
-				sprintf(buffer, "%u", (int)cost);
+				if (unvisited[position] == INFINITY)
+				{
+					DrawText("INF", position.x * map->tileSizeX, position.y * map->tileSizeY, 15, BLACK);
+				}
+				else
+				{
 
-				DrawText(buffer, position.x * map->tileSizeX, position.y * map->tileSizeY, 40, GRAY);
+					float cost = unvisited[position];
+
+					char buffer[30];
+					sprintf(buffer, "%u", (int)cost);
+
+					DrawText(buffer, position.x * map->tileSizeX, position.y * map->tileSizeY, 40, RED);
+				}
 			}
 		}
 

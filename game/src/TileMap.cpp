@@ -12,19 +12,29 @@ void Tilemap::SetTile(int x, int y, Tile type)
 	tiles[x][y] = type;
 }
 
+bool Tilemap::IsInsideGrid(Vector2 screenPosition)
+{
+	if (screenPosition.x <= (MAP_WIDTH * tileSizeX) && screenPosition.x >= 0 &&
+		screenPosition.y < (MAP_HEIGHT * tileSizeY) && screenPosition.y >= 0)
+		return true;
+	else return false;
+}
+
 bool Tilemap::IsInsideGrid(TileCoord tilePosition)
 {
 	if (tilePosition.x < MAP_WIDTH && tilePosition.x >= 0 &&
 		tilePosition.y < MAP_HEIGHT && tilePosition.y >= 0)
 		return true;
-	else if (tilePosition.x < (tileSizeX*MAP_WIDTH) && tilePosition.x >= 0 &&
-		tilePosition.y < (tileSizeX * MAP_HEIGHT) && tilePosition.y >= 0)
-		return true;
 	else return false;
 }
 
+Vector2 Tilemap::TilePosToScreenPos(TileCoord tilePosition)
+{
+	return { (float)tilePosition.x * tileSizeX,(float)tilePosition.y * tileSizeY };
+}
+
 Vector2 Tilemap::TilePosToScreenPos(int x, int y)
-{	
+{
 	return { (float)x * tileSizeX, (float)y * tileSizeY };
 }
 
@@ -33,6 +43,13 @@ Vector2 Tilemap::ScreenPosToTilePos(Vector2 postionOnScreen)
 	if (IsInsideGrid(postionOnScreen))
 		return { postionOnScreen.x / tileSizeX, postionOnScreen.y / tileSizeY };
 	else return { -500,-500 };
+}
+
+Vector2 Tilemap::ScreenPosToTilePos(int xORy)
+{
+
+	return { (float)xORy / tileSizeX, (float)xORy / tileSizeY };
+
 }
 
 bool Tilemap::IsTraversible(TileCoord tilePosition)
@@ -62,12 +79,12 @@ std::vector<TileCoord> Tilemap::GetAllTraversibleTiles()
 
 void Tilemap::DrawBorders(Color color)
 {
-	for (int x = 0; x < GetGridWidth()+1; x++)
+	for (int x = 0; x < GetGridWidth() + 1; x++)
 	{
 		DrawLine(x * tileSizeX, 0, x * tileSizeX, GetGridHeight() * tileSizeX, color);
 	}
 
-	for (int y = 0; y < GetGridHeight()+1; y++)
+	for (int y = 0; y < GetGridHeight() + 1; y++)
 		DrawLine(0, y * tileSizeY, GetGridWidth() * tileSizeX, y * tileSizeY, color);
 }
 
@@ -95,7 +112,7 @@ void Tilemap::RegnerateLevel(int chanceofWall)
 	{
 		for (int y = 0; y < GetGridHeight(); y++)
 		{
-			
+
 			if ((float)rand() / RAND_MAX < floatChance)
 			{
 				SetTile(x, y, Tile::Wall);
@@ -108,7 +125,7 @@ void Tilemap::RegnerateLevel(int chanceofWall)
 
 Vector2 Tilemap::GetTileCenter(TileCoord tilePosition)
 {
-	return { (float)tilePosition.x*tileSizeX + (tileSizeX / 2),(float)tilePosition.y*tileSizeY + (tileSizeY / 2) };
+	return { (float)tilePosition.x * tileSizeX + (tileSizeX / 2),(float)tilePosition.y * tileSizeY + (tileSizeY / 2) };
 }
 
 void Tilemap::MoveSpriteUp()
@@ -185,13 +202,13 @@ void Tilemap::ReplacePlayer()
 			if (IsTraversible(tileCoord))
 			{
 				breakFlag = true;
-				Vector2 centerOfTile = TilePosToScreenPos(x,y);
+				Vector2 centerOfTile = TilePosToScreenPos(x, y);
 
 				player.SetPosition(centerOfTile.x, centerOfTile.y);
 				break;
 			}
 		}
-			if (breakFlag) break;
+		if (breakFlag) break;
 	}
 }
 
