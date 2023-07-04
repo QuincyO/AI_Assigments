@@ -100,8 +100,7 @@ public:
 			//return;
 		}
 		visited;
-		auto Test = map->GetAllTraversibleTiles();
-		auto TEST2 = map->GetTraversibleTilesAdjacentTo(currentNode);
+
 		for (const auto& adjacent : map->GetTraversibleTilesAdjacentTo(currentNode))
 		{
 			if (IsVisited(adjacent)) continue;

@@ -1,0 +1,7 @@
+These are sources which helped us achieve our understanding of pathfinding.
+
+https://www.youtube.com/watch?v=xrlhW6h9cM8&t=1634s&ab_channel=NicholasDay
+https://www.educative.io/answers/how-to-implement-dijkstras-algorithm-in-cpp
+https://www.geeksforgeeks.org/c-program-for-dijkstras-shortest-path-algorithm-greedy-algo-7/
+https://www.tutorialspoint.com/cplusplus-program-for-dijkstra-s-shortest-path-algorithm
+https://www.javatpoint.com/cpp-dijkstra-algorithm-using-priority-queue
