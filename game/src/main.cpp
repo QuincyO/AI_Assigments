@@ -2,19 +2,32 @@
 #include "Math.h"
 #include "TileMap.h"
 #include "Pathfinder.h"
-#include "Agent2.h"
+#include "Character.h"
 #include <iostream>
 #include <vector>
+#include <time.h>
 
 int main(void)
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GAME3001 - Assignment 2");
     rlImGuiSetup(true);
     SetTargetFPS(60);
+    srand(time(NULL));
+    
+    Tilemap* map = new Tilemap();
 
-    Tilemap* map = new Tilemap("../game/assets/p1_walk01.png");
-    Agent* player = new Agent({ 0,0,0,0 }, { 0,0,0,0 }, map, "../game/assets/goomba.png");
+    //Tile textures
+    Texture2D tileTexture = LoadTexture("../game/assets/tiles.png");
+    
+    //Monster
+    Character* monster = new Character({ 0,0,0,0 }, { 0,0,0,0 }, map, "../game/assets/minotaur.png");
     map->player.SetSize(64, 64);
+
+    //Player
+    TileCoord playerPosition = { 0, 0 };
+    Rectangle playerDstRec = { playerPosition.x, playerPosition.y, 64, 64 };
+    Rectangle playerScrRec = { 0, 0, 15, 16 };
+    Texture2D playerTexture = LoadTexture("../game/assets/link.png");
 
     float timer = 0;
 
@@ -28,8 +41,6 @@ int main(void)
     Vector2 acceleration = { 0,0 }; //In px/s/s
     Vector2 direction = { 13.0f,25.0f };
 
-    TileCoord playerPosition = map->Respawn();
-
     bool imGui = true;
     bool useGUI = false;
     bool showTextures = false;
@@ -39,7 +50,6 @@ int main(void)
     bool secondSelected = false;
 
     Vector2 mousePOS = { 0,0 };
-
 
     TileCoord startNode = { 0,0 };
     TileCoord endNode = {};
@@ -54,6 +64,54 @@ int main(void)
         const float dt = GetFrameTime();
         mousePOS = GetMousePosition();
 
+        //PLAYER MOVEMENT
+        playerPosition = map->Move(playerPosition);
+
+        //DRAW MAP
+        map->DrawTiles();
+        map->DrawBorders();
+        if (showTextures) map->DrawTextures(tileTexture);
+        if (showNodes) map->DrawNodes();
+
+        //PATHFINDING
+        TileCoord mouseTilePos = map->ScreenPosToTilePos(GetMousePosition());
+        if (map->IsInsideGrid(mouseTilePos))
+        {
+            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+            {
+                pathfinder = Pathfinder(map, monster->m_tilePosition, TileCoord(mouseTilePos));
+            }
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                pathfinder = Pathfinder(map, monster->m_tilePosition, TileCoord(mouseTilePos));
+                pathfinder.SolvePath();
+                monster->m_tilePosition = TileCoord(mouseTilePos);
+            }
+        }
+        if (pathfinder.map != nullptr)
+        {
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                pathfinder.ProcessNextIterationFunctional();
+            }
+            
+            if (showPath) pathfinder.DrawCurrentState();
+        }
+        if (pathfinder.IsCompleted())
+        {
+            monster->MoveAlongCompletedPath(pathfinder.GetSolution(), monster->GetTilePosition(), pathfinder.goalNode, dt);
+        }
+
+
+        //DRAW CHARACTERS
+        monster->DrawCharacter();
+
+        playerDstRec.x = map->TilePosToScreenPos(playerPosition).x;
+        playerDstRec.y = map->TilePosToScreenPos(playerPosition).y;
+        DrawTexturePro(playerTexture, playerScrRec, playerDstRec, { 0, 0 }, 0.0f, WHITE);
+
+        //ImGUI
         if (IsKeyPressed(KEY_GRAVE)) imGui = !imGui;
         if (imGui)
         {
@@ -81,44 +139,10 @@ int main(void)
             {
                 showPath = !showPath;
             }
-        }
-        map->DrawTiles();
-        map->DrawBorders();
 
-
-
-        TileCoord mouseTilePos = map->ScreenPosToTilePos(GetMousePosition());
-        if (map->IsInsideGrid(mouseTilePos))
-        {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-            {
-                pathfinder = Pathfinder(map, player->m_tilePosition, TileCoord(mouseTilePos));
-            }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                pathfinder = Pathfinder(map, player->m_tilePosition, TileCoord(mouseTilePos));
-                pathfinder.SolvePath();
-            }
-        }
-        if (pathfinder.map != nullptr)
-        {
-            if (IsKeyPressed(KEY_SPACE))
-            {
-                pathfinder.ProcessNextIterationFunctional();
-            }
-            if (showNodes) map->DrawNodes();
-            if (showPath) pathfinder.DrawCurrentState();
-        }
-        if (pathfinder.IsCompleted())
-        {
-            player->MoveAlongCompletedPath(pathfinder.GetSolution(), player->GetTilePosition(), pathfinder.goalNode, dt);
+            rlImGuiEnd();
         }
 
-        Texture2D tileTexture;
-        player->DrawAgent();
-
-        rlImGuiEnd();
         EndDrawing();
     }
 

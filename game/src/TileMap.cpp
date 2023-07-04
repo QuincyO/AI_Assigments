@@ -128,59 +128,46 @@ Vector2 Tilemap::GetTileCenter(TileCoord tilePosition)
 	return { (float)tilePosition.x * tileSizeX + (tileSizeX / 2),(float)tilePosition.y * tileSizeY + (tileSizeY / 2) };
 }
 
-void Tilemap::MoveSpriteUp()
+
+TileCoord Tilemap::Move(TileCoord position)
 {
-	Vector2 playerPos = { player.GetDest().x,player.GetDest().y };
-	TileCoord tileCord = ScreenPosToTilePos(playerPos);
-	tileCord.y -= 1;
+	TileCoord temp;
+	temp.x = position.x;
+	temp.y = position.y;
 
-	if (IsTraversible(tileCord))
+	if (IsKeyPressed(KEY_W))
 	{
-		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
+		if (IsTraversible({ temp.x, temp.y - 1 }))
+			temp.y -= 1;
 	}
-}
 
-void Tilemap::MoveSpriteLeft()
-{
-	Vector2 playerPos = { player.GetDest().x,player.GetDest().y };
-	TileCoord tileCord = ScreenPosToTilePos(playerPos);
-	tileCord.x -= 1;
-
-	if (IsTraversible(tileCord))
+	if (IsKeyPressed(KEY_S))
 	{
-		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
+		if (IsTraversible({ temp.x, temp.y + 1 }))
+			temp.y += 1;
 	}
-}
 
-void Tilemap::MoveSpriteDown()
-{
-	Vector2 playerPos = { player.GetDest().x,player.GetDest().y };
-	TileCoord tileCord = ScreenPosToTilePos(playerPos);
-	tileCord.y += 1;
-
-	if (IsTraversible(tileCord))
+	if (IsKeyPressed(KEY_A))
 	{
-		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
+		if (IsTraversible({ temp.x - 1, temp.y }))
+			temp.x -= 1;
 	}
-}
 
-void Tilemap::MoveSpriteRight()
-{
-	Vector2 playerPos = { player.GetDest().x,player.GetDest().y };
-	TileCoord tileCord = ScreenPosToTilePos(playerPos);
-	tileCord.x += 1;
-
-	if (IsTraversible(tileCord))
+	if (IsKeyPressed(KEY_D))
 	{
-		player.SetPosition(TilePosToScreenPos(tileCord.x, tileCord.y));
+		if (IsTraversible({ temp.x + 1, temp.y }))
+			temp.x += 1;
 	}
+
+	return temp;
 }
 
 TileCoord Tilemap::Respawn()
 {
+
 	while (true)
 	{
-		Vector2 spawn;
+		TileCoord spawn;
 		spawn.x = (rand() % MAP_WIDTH + 1) - 1;
 		spawn.y = (rand() % MAP_HEIGHT + 1) - 1;
 
@@ -250,8 +237,8 @@ void Tilemap::DrawTextures(Texture2D texture)
 			Tile tileType = tiles[x][y]; //Get what type of tile is here.
 			Vector2 tilePosition = TilePosToScreenPos(x, y);
 			Rectangle src = {};
-			if (tileType == Tile::Floor) src = { 173, 232, 32, 32 };
-			else if (tileType == Tile::Wall) src = { 304, 165, 32, 32 };
+			if (tileType == Tile::Floor) src = { 107, 132, 32, 32 };
+			else if (tileType == Tile::Wall) src = { 206, 0, 32, 32 };
 
 			DrawTexturePro(texture, src, { tilePosition.x, tilePosition.y, (float)tileSizeX, (float)tileSizeY }, { 0,0 }, 0.0f, WHITE);
 		}

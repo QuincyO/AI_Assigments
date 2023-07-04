@@ -14,18 +14,18 @@ public:
 
 	}
 
-
-
 protected:
 	Rectangle m_source;
 	Rectangle m_dest;
 };
 
 
-class Agent : public SpriteObject
+class Character : public SpriteObject
 {
 public:
-	Agent(Rectangle source, Rectangle dest, Tilemap* map, const char* assetFilePath, float moveSpeed = 64)
+	TileCoord m_tilePosition;
+
+	Character(Rectangle source, Rectangle dest, Tilemap* map, const char* assetFilePath, float moveSpeed = 64)
 		:SpriteObject(source, dest),
 		map{ map },
 		moveSpeed{ moveSpeed }
@@ -39,6 +39,7 @@ public:
 		m_dest.width = 64;
 		m_dest.height = 64;
 
+		m_tilePosition = { 0, 0 };
 
 	}
 	void SetPosition(Vector2 tilePosition)
@@ -56,43 +57,38 @@ public:
 		return map->TilePosToScreenPos(m_tilePosition);
 	}
 
-	void MoveRight()
+	TileCoord Move(TileCoord position)
 	{
-		TileCoord tempCoord = m_tilePosition;
-		tempCoord.x += 1;
-		if (map->IsTraversible(tempCoord))
-		{
-			SetPosition(map->TilePosToScreenPos(tempCoord));
-		}
-	}
-	void MoveLeft()
-	{
-		TileCoord tempCoord = m_tilePosition;
-		tempCoord.x -= 1;
-		if (map->IsTraversible(tempCoord))
-		{
-			SetPosition(map->TilePosToScreenPos(tempCoord));
-		}
-	}
-	void MoveUp()
-	{
-		TileCoord tempCoord = m_tilePosition;
-		tempCoord.y -= 1;
-		if (map->IsTraversible(tempCoord))
-		{
-			SetPosition(map->TilePosToScreenPos(tempCoord));
-		}
-	}
-	void MoveDown()
-	{
-		TileCoord tempCoord = m_tilePosition;
-		tempCoord.y += 1;
-		if (map->IsTraversible(tempCoord))
-		{
-			SetPosition(map->TilePosToScreenPos(tempCoord));
-		}
-	}
+		TileCoord temp;
+		temp.x = position.x;
+		temp.y = position.y;
 
+		if (IsKeyPressed(KEY_W))
+		{
+			if (map->IsTraversible({ temp.x, temp.y - 1 }))
+				temp.y -= 1;
+		}
+
+		if (IsKeyPressed(KEY_S))
+		{
+			if (map->IsTraversible({ temp.x, temp.y + 1 }))
+				temp.y += 1;
+		}
+
+		if (IsKeyPressed(KEY_A))
+		{
+			if (map->IsTraversible({ temp.x - 1, temp.y }))
+				temp.x -= 1;
+		}
+
+		if (IsKeyPressed(KEY_D))
+		{
+			if (map->IsTraversible({ temp.x + 1, temp.y }))
+				temp.x += 1;
+		}
+
+		return temp;
+	}
 
 	void MoveAlongCompletedPath(std::list<TileCoord> path, TileCoord startNode, TileCoord endNode, float deltaTime)
 	{
@@ -121,15 +117,14 @@ public:
 		}
 	}
 
-
-	void DrawAgent()
+	void DrawCharacter()
 	{
 		m_tilePosition.x = map->ScreenPosToTilePos(m_dest.x).x;
 		m_tilePosition.y = map->ScreenPosToTilePos(m_dest.y).y;
 		DrawTexturePro(m_texture, m_source, m_dest, { 0,0 }, 0, WHITE);
 	}
 
-	TileCoord m_tilePosition;
+	
 private:
 	Texture2D m_texture;
 	Tilemap* map;

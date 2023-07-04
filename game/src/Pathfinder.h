@@ -123,8 +123,6 @@ public:
 
 	}
 
-
-
 	bool SolvePath() //Runs full algorithm until completion
 	{
 		Restart();
@@ -197,7 +195,7 @@ public:
 					char buffer[30];
 					sprintf(buffer, "%u", (int)cost);
 
-					DrawText(buffer, position.x * map->tileSizeX, position.y * map->tileSizeY, 40, RED);
+					DrawText(buffer, position.x * map->tileSizeX, position.y * map->tileSizeY, 40, GRAY);
 				}
 			}
 		}

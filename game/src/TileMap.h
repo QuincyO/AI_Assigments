@@ -25,8 +25,8 @@ class Tilemap
 public:
 	Tilemap(const char* filepath) : player(filepath) {}
 	Tilemap() {}
-private:
 
+private:
 
 	Tile tiles[MAP_WIDTH][MAP_HEIGHT]; //Standard array cannot be chaged at runtime
 
@@ -68,10 +68,7 @@ public:
 
 	Vector2 GetTileCenter(TileCoord tilePosition);
 
-	void MoveSpriteUp();
-	void MoveSpriteLeft();
-	void MoveSpriteDown();
-	void MoveSpriteRight();
+	TileCoord Move(TileCoord position);
 
 	TileCoord Respawn();
 	void ReplacePlayer();
