@@ -100,7 +100,10 @@ int main(void)
         }
         if (pathfinder.IsCompleted())
         {
-            monster->MoveAlongCompletedPath(pathfinder.GetSolution(), monster->GetTilePosition(), pathfinder.goalNode, dt);
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                monster->MoveAlongCompletedPath(pathfinder.GetSolution(), monster->GetTilePosition(), pathfinder.goalNode, dt);
+            }
         }
 
 
